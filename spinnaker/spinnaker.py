@@ -5,7 +5,7 @@ from flask.json import jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
-from flask_restplus import Resource, Api
+from flask_restplus import Resource, Api, reqparse
 
 app = Flask(__name__, static_url_path="")
 logging.basicConfig(level=logging.DEBUG)
@@ -56,6 +56,10 @@ RESTful API for the Spinnaker submissions service
 
 Source: https://github.com/BD2KGenomics/spinnaker
 """)
+app.config.SWAGGER_UI_JSONEDITOR = True
+
+submission_parser = reqparse.RequestParser()
+submission_parser.add_argument("json", location="json")
 
 
 @api.route("/v0/submissions")
@@ -67,6 +71,7 @@ class SubmissionsAPI(Resource):
         """
         return jsonify(submissions=[s.to_dict() for s in Submission.query.all()])
 
+    @api.expect(submission_parser)
     def post(self):
         """
         Creates a new submission
