@@ -25,7 +25,7 @@ def foo():
 """
 Database
 """
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////app/data/spinnaker.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////data/spinnaker.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
@@ -76,4 +76,4 @@ class SubmissionsCollection(Resource):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", use_debugger=True, debug=True)
+    manager.run()
