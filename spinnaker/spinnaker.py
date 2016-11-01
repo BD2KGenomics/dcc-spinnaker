@@ -16,14 +16,18 @@ def index():
     return app.send_static_file("index.html")
 
 
-@app.route("/foo")
-def foo():
+@app.route("/debug")
+def debug():
+    """
+    Throw an exception to show what the Flask debugger looks like.
+    Haven't figured out how to make it work with Flask Restplus...
+    """
     raise
-    return "Hello"
+    return "OK", 200
 
 
 """
-Database
+Database and Models
 """
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////data/spinnaker.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -55,7 +59,7 @@ Source: https://github.com/BD2KGenomics/spinnaker
 
 
 @api.route("/v0/submissions")
-class SubmissionsCollection(Resource):
+class SubmissionsAPI(Resource):
 
     def get(self):
         """
