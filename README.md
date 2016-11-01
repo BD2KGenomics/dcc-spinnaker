@@ -20,6 +20,17 @@ To run tests open another terminal window and:
 
     make test
 
+# Submissions
+
+Make a new submission:
+
+    curl -H "Content-Type: application/json" -X POST -d '{"description": "dude"}' \
+        localhost:5000/v0/submissions
+
+Get a list of all submissions:
+
+    curl localhost:5000/v0/submissions
+
 # Database Migrations
 
 After making changes to the model:
