@@ -1,17 +1,10 @@
 build:
 	docker build -t ucsc/spinnaker .
 
-init:
-	sudo rm -rf migrations data
-	mkdir -p data
-	docker run -it --rm -v `pwd`:/app -v `pwd`/data:/data ucsc/spinnaker python spinnaker/spinnaker.py db init
-
-migrate:
-	docker run -it --rm -v `pwd`:/app -v `pwd`/data:/data ucsc/spinnaker python spinnaker/spinnaker.py db migrate
-	docker run -it --rm -v `pwd`:/app -v `pwd`/data:/data ucsc/spinnaker python spinnaker/spinnaker.py db upgrade
-
 debug:
-	# Run spinnaker out of the current directory with reloading after code change
+	# Create the database if it doesn't exist and apply any migrations if it does
+	docker run -it --rm -v `pwd`:/app -v `pwd`/data:/data ucsc/spinnaker python spinnaker/spinnaker.py db upgrade
+	# Run using the local files for debugging with auto-reloading
 	docker run --name spinnaker --rm -it \
 		-v `pwd`:/app \
 		-v `pwd`/data:/data \
@@ -22,13 +15,14 @@ debug:
 		# ucsc/spinnaker uwsgi --ini uwsgi.ini --honour-stdin --python-autoreload=1 --processes=1 --threads=1
 
 run:
-	# Run using the built image with multiple processes and threads with uwsgi
+	# Apply migrations and then run using the built image
 	docker run -it --rm -v `pwd`/data:/data ucsc/spinnaker python spinnaker/spinnaker.py db upgrade
 	docker run --name spinnaker -it --rm -v `pwd`/data:/data -p 5000:5000 ucsc/spinnaker 
+
+migrate:
+	# Create any required migrations
+	docker run -it --rm -v `pwd`:/app -v `pwd`/data:/data ucsc/spinnaker python spinnaker/spinnaker.py db migrate
 
 test:
 	# Run pytest inside the running container from debug or run
 	docker exec spinnaker py.test -p no:cacheprovider -s -x
-
-stop:
-	docker stop spinnaker || true && docker rm spinnaker || true
