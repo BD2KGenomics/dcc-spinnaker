@@ -1,32 +1,27 @@
-stop:
-	docker stop spinnaker || true && docker rm spinnaker || true
-	# docker stop postgres || true && docker rm postgres || true
-
 build:
 	docker build -t ucsc/spinnaker .
 
-db:
-	# Start postgres docker container
-	docker run -d --name postgres \
-		-v /tmp/postgres:/var/lib/postgresql/data \
-		-e POSTGRES_PASSWORD=password \
-		-e POSTGRES_USER=default \
-		-e POSTGRES_DB=spinnaker \
-		postgres
+init:
+	sudo rm -rf migrations data
+	mkdir -p data
+	docker run -it --rm -v `pwd`:/app ucsc/spinnaker python spinnaker/spinnaker.py db init
 
-    # debug(cmd="python spinnaker/spinnaker.py db upgrade")
-
+migrate:
+	docker run -it --rm -v `pwd`:/app ucsc/spinnaker python spinnaker/spinnaker.py db migrate
+	docker run -it --rm -v `pwd`:/app ucsc/spinnaker python spinnaker/spinnaker.py db upgrade
 
 debug:
 	# Run spinnaker out of the current directory with reloading after code change
 	docker run --name spinnaker --rm -it \
-		-v `pwd`:/app:ro \
+		-v `pwd`:/app \
 		-p 5000:5000 \
-		ucsc/spinnaker uwsgi --ini uwsgi.ini --python-autoreload=1 --processes=1 --threads=1
+		ucsc/spinnaker python spinnaker/spinnaker.py 
+		# in production we'll run under uwsgi but haven't sorted debugger in it
+		# ucsc/spinnaker uwsgi --ini uwsgi.ini --honour-stdin --python-autoreload=1 --processes=1 --threads=1
 
 test:
+	# Run pytest inside the running container from debug or run
 	docker exec spinnaker py.test -p no:cacheprovider -s -x
 
-run:
-	# Run the latest built version from docker hub
-	docker run -d --name spinnaker --link ipfs:ipfs -p 80:5000 ucsc/spinnaker
+stop:
+	docker stop spinnaker || true && docker rm spinnaker || true
