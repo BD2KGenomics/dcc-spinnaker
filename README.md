@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/BD2KGenomics/spinnaker.svg?branch=master)](https://travis-ci.org/BD2KGenomics/spinnaker)
+[![Build Status](https://travis-ci.org/BD2KGenomics/dcc-spinnaker.svg?branch=master)](https://travis-ci.org/BD2KGenomics/dcc-spinnaker)
 
 # Spinnaker Server
 Receives receipts from the spinnaker upload client and validates the data
@@ -21,6 +21,8 @@ To run tests open another terminal window and:
     make test
 
 # Submissions
+
+To view all submissions in a browser navigate to <server>/submissions.html
 
 Make a new submission:
 
