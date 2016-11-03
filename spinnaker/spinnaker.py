@@ -1,6 +1,6 @@
 import datetime
 import logging
-from flask import Flask, request
+from flask import Flask, request, make_response
 from flask.json import jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_script import Manager
@@ -60,8 +60,8 @@ Source: https://github.com/BD2KGenomics/spinnaker
 """)
 app.config.SWAGGER_UI_JSONEDITOR = True
 
-submission_parser = reqparse.RequestParser()
-submission_parser.add_argument("json", location="json")
+json_parser = reqparse.RequestParser()
+json_parser.add_argument("json", location="json")
 
 
 @api.route("/v0/submissions")
@@ -73,7 +73,7 @@ class SubmissionsAPI(Resource):
         """
         return jsonify(submissions=[s.to_dict() for s in Submission.query.all()])
 
-    @api.expect(submission_parser)
+    @api.expect(json_parser)
     def post(self):
         """
         Creates a new submission
@@ -83,7 +83,21 @@ class SubmissionsAPI(Resource):
         submission = Submission(description=fields["description"])
         db.session.add(submission)
         db.session.commit()
-        return jsonify(submission=submission.to_dict())
+        return make_response(jsonify(submission=submission.to_dict()), 201)
+
+
+@api.route("/v0/submissions/<id>")
+class SubmissionAPI(Resource):
+
+    def get(self, id):
+        """
+        Return a submission by uuid
+        """
+        submission = Submission.query.filter_by(id=id).one_or_none()
+        if submission:
+            return jsonify(submission=submission.to_dict())
+        else:
+            return make_response(jsonify(message="Submission {} does not exist".format(id)), 404)
 
 
 """

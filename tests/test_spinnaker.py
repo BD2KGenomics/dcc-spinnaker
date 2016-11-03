@@ -13,11 +13,16 @@ def test_root(server):
 
 
 def test_submit(server):
+    # create a submission
     r = requests.post(url_for(server, "submissions"),
                       json={"description": "foobar"})
-    assert(r.status_code == requests.codes.ok)
+    assert(r.status_code == requests.codes.created)
     submission = json.loads(r.text)["submission"]
     assert(submission['description'] == "foobar")
+
+    # verify its there
+    r = requests.get(url_for(server, "submissions/{}".format(submission["id"])))
+    assert(submission["id"] == json.loads(r.text)["submission"]["id"])
 
     # Verify our submission is in the list of all submissions
     r = requests.get(url_for(server, "submissions"))
