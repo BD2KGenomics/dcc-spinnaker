@@ -7,6 +7,8 @@ from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 from flask_restplus import Resource, Api, reqparse
 
+from validation import validation_engine
+
 app = Flask(__name__, static_url_path="")
 logging.basicConfig(level=logging.DEBUG)
 
@@ -82,6 +84,22 @@ class SubmissionsAPI(Resource):
         db.session.add(submission)
         db.session.commit()
         return jsonify(submission=submission.to_dict())
+
+
+"""
+Validation Engine
+"""
+
+# Run some testing validations
+# TODO non-final route
+@app.route("/test_validate/<submission_id>")
+def test_validate(submission_id):
+  validation_res = validation_engine.validate(submission_id)
+  if(validation_res.validated):
+    result = "Validated!"
+  else:
+    result = "Failed validation: %s" % validation_res.error
+  return result
 
 
 if __name__ == "__main__":
