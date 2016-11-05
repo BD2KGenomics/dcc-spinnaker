@@ -28,3 +28,20 @@ def test_submit(server):
     r = requests.get(url_for(server, "submissions"))
     assert(r.status_code == requests.codes.ok)
     assert(submission["id"] in [s["id"] for s in json.loads(r.text)["submissions"]])
+
+    # Edit the submission
+    r = requests.put(url_for(server, "submissions/{}".format(submission["id"])),
+                     json={"description": "boodarg"})
+    assert(r.status_code == requests.codes.ok)
+
+    # verify its edited
+    r = requests.get(url_for(server, "submissions/{}".format(submission["id"])))
+    assert(json.loads(r.text)["submission"]["description"] == "boodarg")
+
+    # delete it
+    r = requests.delete(url_for(server, "submissions/{}".format(submission["id"])))
+    assert(r.status_code == requests.codes.ok)
+
+    # verify its deleted`
+    r = requests.get(url_for(server, "submissions/{}".format(submission["id"])))
+    assert(r.status_code != requests.codes.ok)
