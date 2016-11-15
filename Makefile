@@ -22,11 +22,8 @@ run:
 stop:
 	docker stop spinnaker || true && docker rm spinnaker || true
 
-# run this after deleting the
-db-reinit:
-	# delete the annoying folders
+reset:
 	sudo rm -rf data migrations
-	# recreate the data and migrations folders
 	docker run -it --rm -v `pwd`:/app -v `pwd`/data:/data ucsc/spinnaker python spinnaker/spinnaker.py db init
 
 migrate:

@@ -1,4 +1,5 @@
-FROM mhart/alpine-node:7.1.0
+# FROM mhart/alpine-node:7.1.0
+FROM alpine
 RUN apk add --update python py-pip
 RUN pip install --upgrade pip
 

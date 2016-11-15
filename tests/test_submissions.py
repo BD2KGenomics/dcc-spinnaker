@@ -1,6 +1,5 @@
 import json
 import requests
-import datetime
 
 
 def url_for(server, *args):
@@ -20,19 +19,12 @@ def test_submit(server):
 
     # make sure the submission was created correctly
     submission = json.loads(r.text)["submission"]
-    assert(submission['status'] == "new")
-    assert(isinstance(submission["date_created"], datetime.date))
-    assert(isinstance(submission["date_modified"], datetime.date))
-    allowedTimeWindow = datetime.timedelta(seconds=1)
-    assert(submission["date_created"] > datetime.datetime.now() - allowedTimeWindow);
-    assert(submission["date_modified"] > datetime.datetime.now() - allowedTimeWindow);
-    assert(submission["date_created"] < datetime.datetime.now() + allowedTimeWindow);
-    assert(submission["date_modified"] < datetime.datetime.now() + allowedTimeWindow);
-
+    assert(submission["status"] == "new")
 
     # verify it's there
     r = requests.get(url_for(server, "submissions/{}".format(submission["id"])))
     assert(submission["id"] == json.loads(r.text)["submission"]["id"])
+    assert(submission["status"] == "new")
 
     # Verify our submission is in the list of all submissions
     r = requests.get(url_for(server, "submissions"))
@@ -41,12 +33,13 @@ def test_submit(server):
 
     # Edit the submission
     r = requests.put(url_for(server, "submissions/{}".format(submission["id"])),
-                     json={"description": "boodarg"})
+                     json={"status": "received", "receipt": "boodarg"})
     assert(r.status_code == requests.codes.ok)
 
     # verify its edited
     r = requests.get(url_for(server, "submissions/{}".format(submission["id"])))
-    assert(json.loads(r.text)["submission"]["description"] == "boodarg")
+    assert(json.loads(r.text)["submission"]["status"] == "received")
+    assert(json.loads(r.text)["submission"]["receipt"] == "boodarg")
 
     # delete it
     r = requests.delete(url_for(server, "submissions/{}".format(submission["id"])))
