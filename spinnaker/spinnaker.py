@@ -122,14 +122,24 @@ Validation Engine
 """
 
 # Run some testing validations
-# TODO non-final route
-@app.route("/test_validate/<submission_id>")
-def test_validate(submission_id):
-  validation_res = validation_engine.validate(submission_id)
-  if(validation_res.validated):
+# TODO ultimately this will most likely not be a route
+@app.route("/v0/validate/<submission_id>")
+def validate(submission_id):
+  submission = Submission.query.get(submission_id)
+  if submission:
+    # TODO : pass receipt info instead of description
+    receipt = submission.description
+  else:
+    return make_response(jsonify(message="Submission {} does not exist".format(submission_id)), 404)
+
+  # Run the validation  
+  validation_result = validation_engine.validate(receipt)
+
+  # TODO : update submission state in DB once that field exists
+  if(validation_result.validated):
     result = "Validated!"
   else:
-    result = "Failed validation: %s" % validation_res.error
+    result = "Failed validation: %s" % validation_result.response
   return result
 
 
