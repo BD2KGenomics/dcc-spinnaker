@@ -68,21 +68,17 @@ json_parser.add_argument("json", location="json")
 class SubmissionsAPI(Resource):
 
     def get(self):
-        """
-        Return a list of all submissions.
-        """
+        """ Get a list of all submissions """
         return jsonify(submissions=[s.to_dict() for s in Submission.query.all()])
 
     @api.expect(json_parser)
     def post(self):
-        """
-        Creates a new submission
-        """
-        logging.info("Creating a new submission")
+        """ Create a submission """
         fields = request.get_json()
         submission = Submission(description=fields["description"])
         db.session.add(submission)
         db.session.commit()
+        logging.info("Created submission id {}".format(submission.id))
         return make_response(jsonify(submission=submission.to_dict()), 201)
 
 
@@ -90,12 +86,33 @@ class SubmissionsAPI(Resource):
 class SubmissionAPI(Resource):
 
     def get(self, id):
-        """
-        Return a submission by uuid
-        """
-        submission = Submission.query.filter_by(id=id).one_or_none()
+        """ Get a submission """
+        submission = Submission.query.get(id)
         if submission:
             return jsonify(submission=submission.to_dict())
+        else:
+            return make_response(jsonify(message="Submission {} does not exist".format(id)), 404)
+
+    @api.expect(json_parser)
+    def put(self, id):
+        """ Edit a submission """
+        submission = Submission.query.get(id)
+        if submission:
+            submission.description = request.get_json().get("description", submission.description)
+            db.session.commit()
+            logging.info("Edited submission {}".format(id))
+            return jsonify(submission=submission.to_dict())
+        else:
+            return make_response(jsonify(message="Submission {} does not exist".format(id)), 404)
+
+    def delete(self, id):
+        """ Delete a submission """
+        submission = Submission.query.get(id)
+        if submission:
+            db.session.delete(submission)
+            db.session.commit()
+            logging.info("Deleted submission {}".format(id))
+            return jsonify(message="Deleted submission {}".format(id))
         else:
             return make_response(jsonify(message="Submission {} does not exist".format(id)), 404)
 
