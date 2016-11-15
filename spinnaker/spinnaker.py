@@ -136,11 +136,14 @@ def validate(submission_id):
   validation_result = validation_engine.validate(receipt)
 
   # TODO : update submission state in DB once that field exists
-  if(validation_result.validated):
-    result = "Validated!"
+
+  did_validate = validation_result.validated
+
+  if(did_validate):
+    message = "Validated!"
   else:
-    result = "Failed validation: %s" % validation_result.response
-  return result
+    message = "Failed validation: %s" % validation_result.response
+  return make_response(jsonify(message=message, validated=did_validate),200)
 
 
 if __name__ == "__main__":

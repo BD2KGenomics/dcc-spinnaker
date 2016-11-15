@@ -1,4 +1,6 @@
 import time # TODO : for testing only
+import csv # parse receipt
+import logging
 
 '''
 Validation Engine
@@ -7,7 +9,8 @@ Validation Engine
 # Takes: information about a submission
 # returns : a ValidationResult
 def validate(submission):
-  result = TestingValidation().validate(submission)
+  #result = TestingValidation().validate(submission)
+  result = ReceiptValidation().validate(submission)
   return result
 
 '''
@@ -30,13 +33,26 @@ Validation Classes
 '''
 
 # Attempt at a "real" validation
-class ValidateRecipt():
+class ReceiptValidation():
   def validate(self, receipt):
-    # is the receipt nonempty
+    # Attempt to parse the receipt as a tsv file
+    # with a header line
+    receipt_arr = receipt.split('\n')
+    reader = csv.DictReader(receipt_arr, delimiter='\t')
+    logging.info("about to parse receipt")
+    logging.info(reader.fieldnames)
+
+    for row in reader:
+      # see if it works I guess?
+      logging.info(row) # TODO don't print this
+    # TODO : account for potential DOS line endings
+    # TODO : fix encoding to be ASCII / UTF-8? Per:
+    # https://docs.python.org/2/library/csv.html#csv-examples
+    # TODO... is the receipt nonempty
     # is the receipt correctly formatted
     # find a file(s) in it
     # see if they exist!
-    return ValidationResult(False, "NYI")
+    return ValidationResult(True, "NYI")
 
 # Some validations to test with
 class TestingValidation():
