@@ -37,11 +37,13 @@ migrate = Migrate(app, db)
 manager = Manager(app)
 manager.add_command("db", MigrateCommand)
 
-
 class Submission(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    description = db.Column(db.Text)
-    date = db.Column(db.DateTime, default=datetime.datetime.utcnow())
+    status = db.Column(db.Enum("new", "received", "validated", "invalid", "signed"), default="new")
+    receipt_text = db.Column(db.Text, nullable=True)
+
+    date_created = db.Column(db.DateTime, default=datetime.datetime.utcnow())
+    date_modified = db.Column(db.DateTime, default=datetime.datetime.utcnow())
 
     def to_dict(self):
         """ Annoyingly jsonify doesn't automatically just work... """
@@ -73,7 +75,7 @@ class SubmissionsAPI(Resource):
     def post(self):
         """ Create a submission """
         fields = request.get_json()
-        submission = Submission(description=fields["description"])
+        submission = Submission(**fields)
         db.session.add(submission)
         db.session.commit()
         logging.info("Created submission id {}".format(submission.id))

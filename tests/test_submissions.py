@@ -1,5 +1,6 @@
 import json
 import requests
+import datetime
 
 
 def url_for(server, *args):
@@ -14,13 +15,22 @@ def test_root(server):
 
 def test_submit(server):
     # create a submission
-    r = requests.post(url_for(server, "submissions"),
-                      json={"description": "foobar"})
+    r = requests.post(url_for(server, "submissions"), json={})
     assert(r.status_code == requests.codes.created)
-    submission = json.loads(r.text)["submission"]
-    assert(submission['description'] == "foobar")
 
-    # verify its there
+    # make sure the submission was created correctly
+    submission = json.loads(r.text)["submission"]
+    assert(submission['status'] == "new")
+    assert(isinstance(submission["date_created"], datetime.date))
+    assert(isinstance(submission["date_modified"], datetime.date))
+    allowedTimeWindow = datetime.timedelta(seconds=1)
+    assert(submission["date_created"] > datetime.datetime.now() - allowedTimeWindow);
+    assert(submission["date_modified"] > datetime.datetime.now() - allowedTimeWindow);
+    assert(submission["date_created"] < datetime.datetime.now() + allowedTimeWindow);
+    assert(submission["date_modified"] < datetime.datetime.now() + allowedTimeWindow);
+
+
+    # verify it's there
     r = requests.get(url_for(server, "submissions/{}".format(submission["id"])))
     assert(submission["id"] == json.loads(r.text)["submission"]["id"])
 
@@ -42,6 +52,6 @@ def test_submit(server):
     r = requests.delete(url_for(server, "submissions/{}".format(submission["id"])))
     assert(r.status_code == requests.codes.ok)
 
-    # verify its deleted`
+    # verify its deleted
     r = requests.get(url_for(server, "submissions/{}".format(submission["id"])))
     assert(r.status_code != requests.codes.ok)

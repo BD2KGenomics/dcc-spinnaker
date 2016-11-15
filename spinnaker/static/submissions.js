@@ -7,7 +7,7 @@ $('document').ready(function() {
       console.log(submission);
       $("body").html(JSON.stringify(submission));
     })
-    .error(function() { 
+    .error(function() {
       $("body").html("error");
     });
   } else {
