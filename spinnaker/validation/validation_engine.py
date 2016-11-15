@@ -32,18 +32,29 @@ Validation Classes
 
 '''
 
-# Attempt at a "real" validation
+# Validate receipt for correct formatting
 class ReceiptValidation():
-  def validate(self, receipt):
-    # Attempt to parse the receipt as a tsv file
-    # with a header line
-    receipt_arr = receipt.split('\n')
-    reader = csv.DictReader(receipt_arr, delimiter='\t')
-    logging.info("about to parse receipt")
-    logging.info(reader.fieldnames)
 
+  def validate(self, receipt):
+
+    # Attempt to parse the receipt as a tsv file with a header line
+    receipt_arr = receipt.split('\n')
+    # Receipt must have at least 2 rows (header + 1 data line) 
+    if len(receipt_arr) < 2 :
+      return ValidationResult(False, "Receipt must contain a header and at least one data line!")
+
+    reader = csv.DictReader(receipt_arr, delimiter='\t')
+    # Fields must be populated
+    if not reader.fieldnames:
+      return ValidationResult(False, "Receipt header must have at least 1 column!")
+    # Check for missing or extra data fields 
     for row in reader:
-      # see if it works I guess?
+      if None in row.values():
+        return ValidationResult(False, "Receipt data line is missing at least 1 column!")
+      if None in row.keys():
+        return ValidationResult(False, "Receipt data line has at least 1 extra column!")
+
+
       logging.info(row) # TODO don't print this
     # TODO : account for potential DOS line endings
     # TODO : fix encoding to be ASCII / UTF-8? Per:
@@ -52,7 +63,7 @@ class ReceiptValidation():
     # is the receipt correctly formatted
     # find a file(s) in it
     # see if they exist!
-    return ValidationResult(True, "NYI")
+    return ValidationResult(True, "Receipt validated ok.")
 
 # Some validations to test with
 class TestingValidation():

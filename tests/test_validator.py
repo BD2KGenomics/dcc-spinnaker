@@ -23,22 +23,23 @@ def validate_sub(server, sub_id):
     r = requests.get(url_for(server, "validate/{}".format(sub_id)))
     return json.loads(r.text)
 
+# Create a submission, validate it, and delete it.
+# Returns whether the validation result was the desired_result
+def run_a_validation(server, sub_description, desired_result):
+  sub_id = insert_sub(server, sub_description)
+  res = validate_sub(server, sub_id)
+  validated_correctly = (res['validated'] == desired_result)
+  delete_sub(server, sub_id)
+  return validated_correctly
 
 # Tests
 def test_validator(server):
 
   # A receipt must be nonempty
-  sub_id = insert_sub(server, "")
-  res = validate_sub(server, sub_id)
-  assert(res['validated'] == False)
-
+  assert(run_a_validation(server, "", False))
   # A receipt must have at least one data line
-  sub_id = insert_sub(server, "program\tproject\tcenter\tsubmitter")
-  res = validate_sub(server, sub_id)
-  assert(res['validated'] == False)
-
+  assert(run_a_validation(server, "program\tproject\tcenter\tsubmitter", False))
   # A receipt must not have extra or missing data columns 
-  sub_id = insert_sub(server, "program\tproject\tcenter\tsubmitter\nTEST\nTEST")
-  res = validate_sub(server, sub_id)
-  assert(res['validated'] == False)
+  assert(run_a_validation(server, "program\tproject\tcenter\tsubmitter\nTEST\nTEST", False))
+  assert(run_a_validation(server, "program\tproject\nTEST\tTEST\tEXTRA", False))
 
