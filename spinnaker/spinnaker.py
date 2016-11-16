@@ -88,8 +88,9 @@ class SubmissionAPI(Resource):
         """ Edit a submission """
         submission = Submission.query.get(id)
         if submission:
-            submission.status = request.get_json().get("status", submission.status)
             submission.receipt = request.get_json().get("receipt", submission.receipt)
+            submission.status = "received"
+            submission.modified = datetime.datetime.utcnow()
             db.session.commit()
             logging.info("Edited submission {}".format(id))
             return jsonify(submission=submission.to_dict())

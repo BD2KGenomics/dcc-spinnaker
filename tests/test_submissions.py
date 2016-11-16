@@ -33,7 +33,7 @@ def test_submit(server):
 
     # Edit the submission
     r = requests.put(url_for(server, "submissions/{}".format(submission["id"])),
-                     json={"status": "received", "receipt": "boodarg"})
+                     json={"receipt": "boodarg"})
     assert(r.status_code == requests.codes.ok)
 
     # verify its edited
