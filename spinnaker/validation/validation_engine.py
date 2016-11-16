@@ -1,6 +1,7 @@
 import time  # TODO : for testing only
 import csv  # parse receipt
 import logging
+import subprocess  # for java call only
 
 '''
 Validation Engine
@@ -11,6 +12,9 @@ Validation Engine
 # returns : a ValidationResult
 def validate(receipt):
     result = ReceiptFormatValidation().validate(receipt)
+    if not(result.validated):
+        return result
+    result = FileExistsValidation().validate(receipt)
     return result
 
 
@@ -37,15 +41,62 @@ Validation Classes
 
 
 class FileExistsValidation():
+
+    # Parameters - replicates ucsc-download.sh
+    BASE_URL = "https://storage2.ucsc-cgl.org"
+    DOWNLOAD_DIR = "/app/validator-downloader/"
+    JAVA_DIR = "/app/validator-downloader/ucsc-storage-client/"
+    SSL_DIR = "ssl/cacerts"
+    JARNAME = "icgc-storage-client-1.0.14-SNAPSHOT/lib/icgc-storage-client.jar"
+    ACCESS_TOKEN = "/app/validator-downloader/accessToken"
+
     def validate(self, receipt):
         receipt_arr = receipt.split('\n')
         reader = csv.DictReader(receipt_arr, delimiter='\t')
+        # TODO : confirm that each key needed exists
         for row in reader:
-            pass
-            # TODO for now, just check the metadata.json files for existence
-            # .. get md and bundle IDs
-            # .. run downloader and download to a holding location
-            # .. check if there is a md.json file there
+            # Get the metadata uuid and bundle uuid.
+            metadata = row['metadata_uuid']
+            bundle = row['bundle_uuid']
+            metadata_filename = "metadata.json"
+            if not(metadata and bundle):
+                return ValidationResult(
+                    False,
+                    "Missing metadata ID or bundle ID for a row in this receipt!")
+            print metadata
+            # Set up the download
+            if not self.download_file(metadata):
+                return ValidationResult(False, "File download failed.")
+            # Check if it exists
+            if not self.check_downloaded_file(bundle, metadata_filename):
+                return ValidationResult(False, "Couldn't find downloaded file")
+        # All files downloaded ok
+        return ValidationResult(True)
+
+    # Run a hardcoded system call to download the desired file.
+    def download_file(self, uuid):
+        # Get the access token
+        with open(self.ACCESS_TOKEN, "r") as tokenfile:
+            token = tokenfile.read().rstrip()
+        cmd = ("java -Djavax.net.ssl.trustStore=" + self.JAVA_DIR + self.SSL_DIR + " "
+               "-Djavax.net.ssl.trustStorePassword=changeit "
+               "-Dmetadata.url=" + self.BASE_URL + ":8444 -Dmetadata.ssl.enabled=true "
+               "-Dclient.ssl.custom=false -Dstorage.url=" + self.BASE_URL + ":5431 "
+               "-DaccessToken=" + token + " "
+               "-jar " + self.JAVA_DIR + self.JARNAME + " "
+               "download --output-dir " + self.DOWNLOAD_DIR + " --object-id " + uuid + " "
+               "--output-layout bundle"
+               )
+        # TODO don't use shell=True but break the above cmd into key/value pairs
+        retval = subprocess.call(cmd, shell=True)
+        return (retval == 0)
+
+    # See if the named file exists in the bundle in the download dir
+    def check_downloaded_file(self, bundle, filename):
+        # TODO - check the file's existence
+        # It'll be inside the bundle in the download dir
+        # Then do cleanup - remove it
+        return True  # NYI
 
 
 # Validate receipt for correct formatting
