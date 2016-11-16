@@ -8,9 +8,9 @@ Validation Engine
 
 # Takes: information about a submission
 # returns : a ValidationResult
-def validate(submission):
-  #result = TestingValidation().validate(submission)
-  result = ReceiptValidation().validate(submission)
+def validate(receipt):
+  result = ReceiptFormatValidation().validate(receipt)
+   
   return result
 
 '''
@@ -23,8 +23,7 @@ class ValidationResult():
     self.validated = validated
     self.response = response
     # TODO : validated must be True or False
-    # If validated is False, the response must be a string
-    # (ie, error responses are mandatory; but success responses
+    # if validated is false, response must be non-empty (what was the error?)
 
 
 '''
@@ -32,8 +31,22 @@ Validation Classes
 
 '''
 
+class FileExistsValidation():
+  def validate(self, receipt):
+    receipt_arr = receipt.split('\n')
+    reader = csv.DictReader(receipt_arr, delimiter='\t')
+    for row in reader:
+      pass
+      # TODO for now, just check the metadata.json files for existence
+      #.. get md and bundle IDs
+      #.. run downloader and download to a holding location
+      #.. check if there is a md.json file there
+
 # Validate receipt for correct formatting
-class ReceiptValidation():
+# and also if the fields match the specification given
+# TODO confirm that this is necessary & sufficient
+# Might a receipt have extra fields?
+class ReceiptFormatValidation():
 
   def validate(self, receipt):
 
@@ -47,6 +60,9 @@ class ReceiptValidation():
     # Fields must be populated
     if not reader.fieldnames:
       return ValidationResult(False, "Receipt header must have at least 1 column!")
+
+    # TODO fields must match the spec
+
     # Check for missing or extra data fields 
     for row in reader:
       if None in row.values():
@@ -54,15 +70,10 @@ class ReceiptValidation():
       if None in row.keys():
         return ValidationResult(False, "Receipt data line has at least 1 extra column!")
 
-
       logging.info(row) # TODO don't print this
     # TODO : account for potential DOS line endings
     # TODO : fix encoding to be ASCII / UTF-8? Per:
     # https://docs.python.org/2/library/csv.html#csv-examples
-    # TODO... is the receipt nonempty
-    # is the receipt correctly formatted
-    # find a file(s) in it
-    # see if they exist!
     return ValidationResult(True, "Receipt validated ok.")
 
 # Some validations to test with
