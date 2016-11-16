@@ -16,16 +16,6 @@ def index():
     return app.send_static_file("index.html")
 
 
-@app.route("/debug")
-def debug():
-    """
-    Throw an exception to show what the Flask debugger looks like.
-    Haven't figured out how to make it work with Flask Restplus...
-    """
-    raise
-    return "OK", 200
-
-
 """
 Database and Models
 """
@@ -40,8 +30,10 @@ manager.add_command("db", MigrateCommand)
 
 class Submission(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    description = db.Column(db.Text)
-    date = db.Column(db.DateTime, default=datetime.datetime.utcnow())
+    status = db.Column(db.Enum("new", "received", "validated", "invalid", "signed"), default="new")
+    created = db.Column(db.DateTime, default=datetime.datetime.utcnow())
+    modified = db.Column(db.DateTime, default=datetime.datetime.utcnow())
+    receipt = db.Column(db.Text)
 
     def to_dict(self):
         """ Annoyingly jsonify doesn't automatically just work... """
@@ -71,9 +63,9 @@ class SubmissionsAPI(Resource):
 
     @api.expect(json_parser)
     def post(self):
-        """ Create a submission """
+        """ Create a new empty submission """
         fields = request.get_json()
-        submission = Submission(description=fields["description"])
+        submission = Submission(**fields)
         db.session.add(submission)
         db.session.commit()
         logging.info("Created submission id {}".format(submission.id))
@@ -96,7 +88,9 @@ class SubmissionAPI(Resource):
         """ Edit a submission """
         submission = Submission.query.get(id)
         if submission:
-            submission.description = request.get_json().get("description", submission.description)
+            submission.receipt = request.get_json().get("receipt", submission.receipt)
+            submission.status = "received"
+            submission.modified = datetime.datetime.utcnow()
             db.session.commit()
             logging.info("Edited submission {}".format(id))
             return jsonify(submission=submission.to_dict())
