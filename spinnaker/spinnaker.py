@@ -121,29 +121,31 @@ class SubmissionAPI(Resource):
 Validation Engine
 """
 
+
 # Run some testing validations
 # TODO ultimately this will most likely not be a route
 @app.route("/v0/validate/<submission_id>")
 def validate(submission_id):
-  submission = Submission.query.get(submission_id)
-  if submission:
-    # TODO : pass receipt info instead of description
-    receipt = submission.description
-  else:
-    return make_response(jsonify(message="Submission {} does not exist".format(submission_id)), 404)
+    submission = Submission.query.get(submission_id)
+    if submission:
+        # TODO : pass receipt info instead of description
+        receipt = submission.description
+    else:
+        return make_response(jsonify(
+            message="Submission {} does not exist".format(submission_id)), 404)
 
-  # Run the validation  
-  validation_result = validation_engine.validate(receipt)
+    # Run the validation
+    validation_result = validation_engine.validate(receipt)
 
-  # TODO : update submission state in DB once that field exists
+    # TODO : update submission state in DB once that field exists
 
-  did_validate = validation_result.validated
+    did_validate = validation_result.validated
 
-  if(did_validate):
-    message = "Validated!"
-  else:
-    message = "Failed validation: %s" % validation_result.response
-  return make_response(jsonify(message=message, validated=did_validate),200)
+    if(did_validate):
+        message = "Validated!"
+    else:
+        message = "Failed validation: %s" % validation_result.response
+    return make_response(jsonify(message=message, validated=did_validate), 200)
 
 
 if __name__ == "__main__":
