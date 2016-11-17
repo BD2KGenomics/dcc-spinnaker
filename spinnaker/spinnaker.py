@@ -122,8 +122,7 @@ Validation Engine
 def validate(submission_id):
     submission = Submission.query.get(submission_id)
     if submission:
-        # TODO : pass receipt info instead of description
-        receipt = submission.description
+        receipt = submission.receipt
     else:
         return make_response(jsonify(
             message="Submission {} does not exist".format(submission_id)), 404)
@@ -131,15 +130,19 @@ def validate(submission_id):
     # Run the validation
     validation_result = validation_engine.validate(receipt)
 
-    # TODO : update submission state in DB once that field exists
-
-    did_validate = validation_result.validated
-
-    if(did_validate):
-        message = "Validated!"
+    if(validation_result.validated):
+        submission.status = "validated"
+        submission.modified = datetime.datetime.utcnow()
+        db.session.commit()
+        logging.info("Validated submission {}".format(submission_id))
+        message = "Validated {}".format(validation_result.response)
     else:
-        message = "Failed validation: %s" % validation_result.response
-    return make_response(jsonify(message=message, validated=did_validate), 200)
+        submission_status = "invalid"
+        submission.modified = datetime.datetime.utcnow()
+        db.session.commit()
+        logging.info("Invalid submission {}".format(submission_id))
+        message = "Failed validation: {}".format(validation_result.response)
+    return make_response(jsonify(message=message, validated=validation_result.validated), 200)
 
 
 if __name__ == "__main__":

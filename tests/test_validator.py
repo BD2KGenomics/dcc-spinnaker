@@ -11,9 +11,9 @@ def url_for(server, *args):
 
 
 # returns submission ID
-def insert_sub(server, sub_description):
+def insert_sub(server, sub_receipt):
     r = requests.post(url_for(server, "submissions"),
-                      json={"description": sub_description})
+                      json={"receipt": sub_receipt})
     submission = json.loads(r.text)["submission"]
     return submission["id"]
 
@@ -30,8 +30,8 @@ def validate_sub(server, sub_id):
 
 # Create a submission, validate it, and delete it.
 # Returns whether the validation result was the desired_result
-def run_a_validation(server, sub_description, desired_result):
-    sub_id = insert_sub(server, sub_description)
+def run_a_validation(server, sub_receipt, desired_result):
+    sub_id = insert_sub(server, sub_receipt)
     res = validate_sub(server, sub_id)
     validated_correctly = (res['validated'] == desired_result)
     delete_sub(server, sub_id)
