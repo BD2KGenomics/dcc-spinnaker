@@ -17,10 +17,14 @@ debug:
 run:
 	# Apply migrations and then run using the built image in daemon mode
 	docker run -it --rm -v `pwd`/data:/data ucsc/spinnaker python spinnaker/spinnaker.py db upgrade
-	docker run --name spinnaker -d -v `pwd`/data:/data -p 5000:5000 ucsc/spinnaker 
+	docker run --name spinnaker -d -v `pwd`/data:/data -p 5000:5000 ucsc/spinnaker
 
 stop:
 	docker stop spinnaker || true && docker rm spinnaker || true
+
+reset:
+	sudo rm -rf data migrations
+	docker run -it --rm -v `pwd`:/app -v `pwd`/data:/data ucsc/spinnaker python spinnaker/spinnaker.py db init
 
 migrate:
 	# Create any required migrations

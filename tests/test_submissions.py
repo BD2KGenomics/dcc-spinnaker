@@ -14,15 +14,17 @@ def test_root(server):
 
 def test_submit(server):
     # create a submission
-    r = requests.post(url_for(server, "submissions"),
-                      json={"description": "foobar"})
+    r = requests.post(url_for(server, "submissions"), json={})
     assert(r.status_code == requests.codes.created)
-    submission = json.loads(r.text)["submission"]
-    assert(submission['description'] == "foobar")
 
-    # verify its there
+    # make sure the submission was created correctly
+    submission = json.loads(r.text)["submission"]
+    assert(submission["status"] == "new")
+
+    # verify it's there
     r = requests.get(url_for(server, "submissions/{}".format(submission["id"])))
     assert(submission["id"] == json.loads(r.text)["submission"]["id"])
+    assert(submission["status"] == "new")
 
     # Verify our submission is in the list of all submissions
     r = requests.get(url_for(server, "submissions"))
@@ -31,17 +33,18 @@ def test_submit(server):
 
     # Edit the submission
     r = requests.put(url_for(server, "submissions/{}".format(submission["id"])),
-                     json={"description": "boodarg"})
+                     json={"receipt": "boodarg"})
     assert(r.status_code == requests.codes.ok)
 
     # verify its edited
     r = requests.get(url_for(server, "submissions/{}".format(submission["id"])))
-    assert(json.loads(r.text)["submission"]["description"] == "boodarg")
+    assert(json.loads(r.text)["submission"]["status"] == "received")
+    assert(json.loads(r.text)["submission"]["receipt"] == "boodarg")
 
     # delete it
     r = requests.delete(url_for(server, "submissions/{}".format(submission["id"])))
     assert(r.status_code == requests.codes.ok)
 
-    # verify its deleted`
+    # verify its deleted
     r = requests.get(url_for(server, "submissions/{}".format(submission["id"])))
     assert(r.status_code != requests.codes.ok)
