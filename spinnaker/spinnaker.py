@@ -137,7 +137,7 @@ def validate(submission_id):
         logging.info("Validated submission {}".format(submission_id))
         message = "Validated {}".format(validation_result.response)
     else:
-        submission_status = "invalid"
+        submission.status = "invalid"
         submission.modified = datetime.datetime.utcnow()
         db.session.commit()
         logging.info("Invalid submission {}".format(submission_id))

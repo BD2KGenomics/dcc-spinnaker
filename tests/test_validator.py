@@ -48,3 +48,31 @@ def test_validator(server):
     # A receipt must not have extra or missing data columns
     assert(run_a_validation(server, "program\tproject\tcenter\tsubmitter\nTEST\nTEST", False))
     assert(run_a_validation(server, "program\tproject\nTEST\tTEST\tEXTRA", False))
+
+    # TODO: more tests to write
+    # A receipt must have all of the appropriate column headers (extras are ok)
+    #         fieldnames = ["program"    #  "project"
+    #  "center_name"
+    #  "submitter_donor_id"
+    #  "donor_uuid"
+    #  "submitter_specimen_id"
+    #  "specimen_uuid"
+    #  "submitter_specimen_type"
+    #  "submitter_sample_id"
+    #  "sample_uuid"
+    #  "analysis_type"
+    #  "workflow_name"
+    #  "workflow_version"
+    #  "file_type"
+    #  "file_path"
+    #  "file_uuid"
+    #  "bundle_uuid"
+    #  "metadata_uuid"]
+
+    # Test the file download validator :
+    # won't download :
+    # ok receipt format, not a uuid
+    # ok receipt format, bad file uuid ( doesn't exist)
+
+    # downloads but won't check :
+    # ok receipt format, ok file uuid, but bad bundle id or file name
