@@ -13,32 +13,34 @@ import requests
 # object_id : uuid of the object
 # redwood_key : key for the redwood storage server (not an AWS key)
 def download_json(redwood_storage_url, object_id, redwood_key):
-    # Talk to the redwood server and get an aws signed URL for the passed-in object_id
+    aws_url = get_aws_url(redwood_storage_url, object_id, redwood_key)
+    aws_response = requests.get(aws_url)
+    return aws_response.json()
+
+
+# Talk to the redwood server and get an aws signed URL for the passed-in object_id
+def get_aws_url(redwood_storage_url, object_id, redwood_key):
     parameters = {'offset': '0', 'length': '-1', 'external': 'true'}
     url = '%s/download/%s' % (redwood_storage_url, object_id)
     header = {'AUTHORIZATION': 'Bearer %s' % redwood_key}
     # TODO  specify a timeout to prevent server from potentially hanging forever in prod mode
     redwood_response = requests.get(url, headers=header, params=parameters)
-    # TODO error-checking - make sure all these bits actually exist
+    # TODO error-checking - make sure all the following pieces actually exist
     aws_url = redwood_response.json()['parts'][0]['url']
-
-    # Get the passed object in its entirety
-    aws_response = requests.get(aws_url)
-
-    print aws_response.json()
-
-    return aws_response.json()
+    return aws_url
 
 
-# TODO NYI
-# Download the beginning of an arbitrary binary file as specified by range_len
-# and return it as bytes.
-def download_partial_file(redwood_storage_url, object_id, redwood_key, range_len):
-    return "NYI"
+# Download the first range_len bytes of the requested object and return the content
+def download_partial_file(redwood_storage_url, object_id, redwood_key, range_len="64"):
+    aws_url = get_aws_url(redwood_storage_url, object_id, redwood_key)
+    header = {'Range': range_len}
+    aws_response = requests.get(aws_url, headers=header)
+    return aws_response.content
 
 
+# Standalone: Just return the URL.
 def main(*args):
-    download_json(*args)
+    print get_aws_url(*args)
 
 
 if __name__ == "__main__":

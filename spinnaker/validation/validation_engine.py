@@ -40,6 +40,8 @@ Validation Classes
 '''
 
 
+# For each item in the receipt
+# Checks that the metadata.json exists
 class FileExistsValidation():
 
     # Parameters - replicates ucsc-download.sh
@@ -50,27 +52,40 @@ class FileExistsValidation():
         receipt_arr = receipt.split('\n')
         reader = csv.DictReader(receipt_arr, delimiter='\t')
         for row in reader:
-            # Get the metadata uuid and bundle uuid.
-            metadata = row['metadata_uuid']
-            bundle = row['bundle_uuid']
-            if not(metadata and bundle):
-                return ValidationResult(
-                    False,
-                    "Missing metadata ID or bundle ID for a row in this receipt!")
-            print metadata
-            # Set up the download
-            downloaded_json = self.download_file(metadata)
+            # Get file info from the receipt, returning a bad result if unable
+            bad_receipt_result = ValidationResult(
+                False,
+                "Missing metadata ID, file ID, or bundle ID for a row in this receipt!")
+            try:
+                file_uuid = row['file_uuid']
+                metadata = row['metadata_uuid']
+                bundle = row['bundle_uuid']
+            except KeyError:
+                return bad_receipt_result
+            if not(metadata and bundle and file_uuid):
+                return bad_receipt_result
+            # Download the metadata and check it for emptyiness
+            downloaded_json = self.download_file(metadata, False)
             if not downloaded_json:
-                return ValidationResult(False, "Failed to download file.")
-            # Check if it exists
-            if not self.check_downloaded_file(downloaded_json):
-                return ValidationResult(False, "Couldn't find downloaded file.")
+                return ValidationResult(False, "Failed to download metadata.json %s." % metadata)
+            if not self.check_downloaded_json(downloaded_json):
+                return ValidationResult(False, "Downloaded json %s is not valid." % metadata)
+
+            # Also download and check the beginning of the data file
+            downloaded_file = self.download_file(file_uuid, True)
+            if not downloaded_file:
+                return ValidationResult(False, "Failed to download the data file %s." % file_uuid)
+            if not self.check_downloaded_file(downloaded_file):
+                return ValidationResult(False, "Downloaded file %s is not valid." % file_uuid)
         # All files downloaded ok
         return ValidationResult(True)
 
     # use the python redwood client to download
-    # the metadata file and return it
-    def download_file(self, uuid):
+    # a file and return the contents.
+    # partial_download : if True, downloads the beginning of the file, as binary.
+    # Otherwise, downloads the entire file as json.
+    # TODO : is this really the best way to specify?
+    def download_file(self, uuid, partial_download):
         # Get the access token
         try:
             with open(self.ACCESS_TOKEN, "r") as tokenfile:
@@ -79,16 +94,22 @@ class FileExistsValidation():
             logging.info("Couldn't find download access token at path {}".format(self.ACCESS_TOKEN))
             return False
 
-        # TODO : parse the uuid and ensure it's really a UUID here, to save some time
-        # as the jar would reject it
-
-        result = redwood_client_lite.download_json(self.BASE_URL, uuid, token)
+        if partial_download:
+            result = redwood_client_lite.download_partial_file(self.BASE_URL, uuid, token)
+        else:
+            result = redwood_client_lite.download_json(self.BASE_URL, uuid, token)
         return result
 
-    def check_downloaded_file(self, json):
+    def check_downloaded_json(self, json):
         # TODO : inspect the json to see if it meets
         # some sort of standards
         return True
+
+    def check_downloaded_file(self, file_contents):
+        # TODO - meet some sort of standard?
+        # For now, just confirm that it is nonempty by returning the contents back
+        # since it will be checked for truthiness
+        return file_contents
 
 
 # Validate receipt for correct formatting
