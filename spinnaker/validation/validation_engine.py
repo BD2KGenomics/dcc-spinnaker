@@ -1,8 +1,7 @@
 import time  # TODO : for testing only
 import csv  # parse receipt
 import logging
-import subprocess  # for java call only
-import os
+import redwood_client_lite
 
 '''
 Validation Engine
@@ -44,11 +43,7 @@ Validation Classes
 class FileExistsValidation():
 
     # Parameters - replicates ucsc-download.sh
-    BASE_URL = "https://storage2.ucsc-cgl.org"
-    DOWNLOAD_DIR = "/app/validator-downloader/"
-    JAVA_DIR = "/app/validator-downloader/ucsc-storage-client/"
-    SSL_DIR = "ssl/cacerts"
-    JARNAME = "icgc-storage-client-1.0.14-SNAPSHOT/lib/icgc-storage-client.jar"
+    BASE_URL = "https://storage2.ucsc-cgl.org:5431"
     ACCESS_TOKEN = "/app/validator-downloader/accessToken"
 
     def validate(self, receipt):
@@ -58,22 +53,23 @@ class FileExistsValidation():
             # Get the metadata uuid and bundle uuid.
             metadata = row['metadata_uuid']
             bundle = row['bundle_uuid']
-            metadata_filename = "metadata.json"
             if not(metadata and bundle):
                 return ValidationResult(
                     False,
                     "Missing metadata ID or bundle ID for a row in this receipt!")
             print metadata
             # Set up the download
-            if not self.download_file(metadata):
+            downloaded_json = self.download_file(metadata)
+            if not downloaded_json:
                 return ValidationResult(False, "Failed to download file.")
             # Check if it exists
-            if not self.check_downloaded_file(bundle, metadata_filename):
+            if not self.check_downloaded_file(downloaded_json):
                 return ValidationResult(False, "Couldn't find downloaded file.")
         # All files downloaded ok
         return ValidationResult(True)
 
-    # Run a hardcoded system call to download the desired file.
+    # use the python redwood client to download
+    # the metadata file and return it
     def download_file(self, uuid):
         # Get the access token
         try:
@@ -86,39 +82,12 @@ class FileExistsValidation():
         # TODO : parse the uuid and ensure it's really a UUID here, to save some time
         # as the jar would reject it
 
-        cmd = ("java -Djavax.net.ssl.trustStore=" + self.JAVA_DIR + self.SSL_DIR + " "
-               "-Djavax.net.ssl.trustStorePassword=changeit "
-               "-Dmetadata.url=" + self.BASE_URL + ":8444 -Dmetadata.ssl.enabled=true "
-               "-Dclient.ssl.custom=false -Dstorage.url=" + self.BASE_URL + ":5431 "
-               "-DaccessToken=" + token + " "
-               "-jar " + self.JAVA_DIR + self.JARNAME + " "
-               "download --output-dir " + self.DOWNLOAD_DIR + " --object-id " + uuid + " "
-               "--output-layout bundle"
-               )
-        # TODO don't use shell=True but break the above cmd into key/value pairs
-        retval = subprocess.call(cmd, shell=True)
+        result = redwood_client_lite.download_json(self.BASE_URL, uuid, token)
+        return result
 
-        # TODO : is there a good way to get the bundle ID from the download output
-        # so we can clean it up later if the metadata had it wrong
-        # (Very unlikely with real data, so not high priority)
-        return (retval == 0)
-
-    # See if the named file exists in the bundle in the download dir
-    def check_downloaded_file(self, bundle, filename):
-        # Get path to file
-        download_path = self.DOWNLOAD_DIR + bundle + "/" + filename
-        try:
-            with open(download_path, "r"):
-                # TODO : Look at the contents of the file and
-                # make some judgement about it
-                pass
-            # Clean up the downloaded file (whether it worked or not)
-            os.remove(download_path)
-            # TODO : also need to clean up the bundle directory at some point
-            # but when ? might bundles persist over multiple lines of the receipt?
-        except IOError as e:
-            logging.info("I/O error({0}): {1}: {2}".format(e.errno, e.strerror, download_path))
-            return False
+    def check_downloaded_file(self, json):
+        # TODO : inspect the json to see if it meets
+        # some sort of standards
         return True
 
 

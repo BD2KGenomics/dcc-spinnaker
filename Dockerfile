@@ -1,7 +1,5 @@
-# for the validator-downloader: use alpine with java8 jre installed instead
 # FROM mhart/alpine-node:7.1.0
-# FROM alpine
-FROM openjdk:8-jre-alpine
+FROM alpine
 
 RUN apk add --update python py-pip
 RUN pip install --upgrade pip
