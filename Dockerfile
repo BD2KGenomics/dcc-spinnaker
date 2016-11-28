@@ -1,6 +1,5 @@
 # FROM mhart/alpine-node:7.1.0
 FROM alpine
-
 RUN apk add --update python py-pip
 RUN pip install --upgrade pip
 
@@ -11,7 +10,7 @@ RUN apk add --update uwsgi-python
 ADD ./requirements.txt /app/requirements.txt
 RUN pip install -r /app/requirements.txt
 
-# validator-downloader: also add bash
+# Add bash for debugging convenience
 RUN apk add --update bash 
 
 # # Install yarn
@@ -22,9 +21,6 @@ RUN apk add --update bash
 
 # Add app code
 ADD . /app
-# validator-downloader: TODO get the java code from Brian's download link
-# for now, it needs to be added after checkout to the validator-downloader
-# dir, along with the accessToken, because it is .gitignored.
 
 EXPOSE 5000
 

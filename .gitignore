@@ -6,7 +6,5 @@
 /.cache/
 /tests/.cache/
 
-# for the validator's download tool
-ucsc-storage-client
-ucsc-storage-client.tar.gz
+# access token for the Redwood server
 accessToken
