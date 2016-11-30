@@ -1,3 +1,4 @@
+import sys
 import datetime
 import logging
 from flask import Flask, request, make_response
@@ -11,6 +12,16 @@ from validation import validation_engine
 
 app = Flask(__name__, static_url_path="")
 logging.basicConfig(level=logging.DEBUG)
+
+# uwsgi is being used only to send async jobs to the spooler.
+# it's only available when the app is run in a uwsgi context.
+# Allow the app to be run outside of that context for other 
+# tasks, eg db migration.
+# Do this after the logging is config so it we can log it.
+try:
+    import uwsgi
+except ImportError:
+    logging.info("Couldn't import uwsgi.")
 
 
 @app.route("/")
@@ -55,6 +66,7 @@ app.config.SWAGGER_UI_JSONEDITOR = True
 json_parser = reqparse.RequestParser()
 json_parser.add_argument("json", location="json")
 
+# test route for testing this after stuff
 
 @api.route("/v0/submissions")
 class SubmissionsAPI(Resource):
@@ -90,11 +102,17 @@ class SubmissionAPI(Resource):
         """ Edit a submission """
         submission = Submission.query.get(id)
         if submission:
-            submission.receipt = request.get_json().get("receipt", submission.receipt)
+            receipt = request.get_json().get("receipt", submission.receipt)
+            submission.receipt = receipt
             submission.status = "received"
             submission.modified = datetime.datetime.utcnow()
             db.session.commit()
             logging.info("Edited submission {}".format(id))
+            # Asynchronously kick off the validate if available
+            if 'uwsgi' in sys.modules:
+                uwsgi.spool({'key': receipt})
+            else:
+                logging.debug("UWSGI not available; skipping validation.")
             return jsonify(submission=submission.to_dict())
         else:
             return make_response(jsonify(message="Submission {} does not exist".format(id)), 404)
@@ -114,6 +132,16 @@ class SubmissionAPI(Resource):
 """
 Validation Engine
 """
+
+@app.route("/v0/testspooler/<blah>")
+def foo(blah):
+    print blah
+    logging.info("about to return in foo")
+    if 'uwsgi' in sys.modules:
+        uwsgi.spool({'key': blah})
+    else:
+        logging.info("UWSGI not available; skipping!")
+    return "<b>yep</b> it ran"
 
 
 # Run some testing validations
