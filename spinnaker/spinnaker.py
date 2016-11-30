@@ -154,7 +154,7 @@ def do_validate(submission_id):
         return ({"message": "Submission {} does not exist".format(submission_id)}, 404)
 
     # Call the validation module
-    validation_result = validation_engine.validate(receipt)
+    validation_result = validation_engine.run_validations(receipt)
 
     if(validation_result.validated):
         submission.status = "validated"
