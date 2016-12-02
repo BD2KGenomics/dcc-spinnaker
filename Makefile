@@ -10,7 +10,8 @@ debug:
 		-v `pwd`/data:/data \
 		-p 5000:5000 \
 		-e FLASK_DEBUG='True' \
-		ucsc/spinnaker python spinnaker/spinnaker.py runserver --host 0.0.0.0
+		ucsc/spinnaker uwsgi --ini uwsgi.ini --honour-stdin --python-autoreload=1 --processes=1 --threads=1
+		#ucsc/spinnaker python spinnaker/spinnaker.py runserver --host 0.0.0.0
 		# To run in uwsgi with reloading use the following, but flask debugger doesn't work...
 		# ucsc/spinnaker uwsgi --ini uwsgi.ini --honour-stdin --python-autoreload=1 --processes=1 --threads=1
 

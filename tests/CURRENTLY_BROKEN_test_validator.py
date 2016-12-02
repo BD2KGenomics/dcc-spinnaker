@@ -2,6 +2,12 @@ import json
 import requests
 # Tests for the validator
 
+# TODO : none of these will work any more because
+# all the validations run asynchronously now and the
+# endpoint is changed.
+#  change it to not interact with the server
+# and just call the validation module directly.
+
 # Helper functions
 
 
@@ -24,7 +30,7 @@ def delete_sub(server, sub_id):
 
 # Takes ID, returns the result json
 def validate_sub(server, sub_id):
-    r = requests.get(url_for(server, "validate/{}".format(sub_id)))
+    r = requests.get(url_for(server, "validation/{}".format(sub_id)))
     return json.loads(r.text)
 
 
