@@ -32,14 +32,38 @@ def run_validations(receipt):
 '''
 Result of a validation.
 validated : Boolean
-response : String
+response : String - a general class of response
+details : String, optional - a more specific response that may mention submission-specific details.
 '''
 
 
 class ValidationResult():
-    def __init__(self, validated, response=""):
+
+    # Result strings that might be returned
+
+    # Failure
+    RECEIPT_MISSING_MD_FILE_OR_BUNDLE = (
+        "Missing metadata ID, file ID, or bundle ID for a row in this receipt!")
+    RECEIPT_TOO_SHORT = (
+            "Receipt must contain a header and at least one data line!")
+    RECEIPT_NO_HEADER = (
+            "Receipt header must have at least 1 column!")
+    RECEIPT_MISSING_DATA_COL = (
+                "Receipt data line is missing at least 1 column!")
+    RECEIPT_EXTRA_DATA_COL = (
+                "Receipt data line has at least 1 extra column!")
+
+    # TODO : make these more granular
+    BAD_DOWNLOAD_METADATA = ("Metadata.json failed to download.")
+    BAD_DOWNLOAD_DATA = ("Data file failed to download.")
+
+    # Success
+    RECEIPT_OK = "Receipt validated ok."
+
+    def __init__(self, validated, response="", details=""):
         self.validated = validated
         self.response = response
+        self.details = details
         # TODO : validated must be True or False
         # if validated is false, response must be non-empty
         # (what was the error?)
@@ -73,7 +97,7 @@ def validate_bbb_FileExists(receipt):
             # Get file info from the receipt, returning a bad result if unable
             bad_receipt_result = ValidationResult(
                 False,
-                "Missing metadata ID, file ID, or bundle ID for a row in this receipt!")
+                ValidationResult.RECEIPT_MISSING_MD_FILE_OR_BUNDLE)
             try:
                 file_uuid = row['file_uuid']
                 metadata = row['metadata_uuid']
@@ -89,11 +113,14 @@ def validate_bbb_FileExists(receipt):
             except redwood_client_lite.RedwoodServerError as error:
                 return ValidationResult(
                     False,
+                    ValidationResult.BAD_DOWNLOAD_METADATA,
                     "Failed to download metadata.json %s: Server error: %s." % (metadata, error))
             if not downloaded_json:
-                return ValidationResult(False, "metadata.json file %s was empty." % metadata)
+                return ValidationResult(False, ValidationResult.BAD_DOWNLOAD_METADATA,
+                                        "metadata.json file %s was empty." % metadata)
             if not check_downloaded_json(downloaded_json):
-                return ValidationResult(False, "Downloaded json %s is not valid." % metadata)
+                return ValidationResult(False, ValidationResult.BAD_DOWNLOAD_METADATA,
+                                        "Downloaded json %s is not valid." % metadata)
 
             # Also download and check the beginning of the data file
             try:
@@ -101,11 +128,14 @@ def validate_bbb_FileExists(receipt):
             except redwood_client_lite.RedwoodServerError as error:
                 return ValidationResult(
                     False,
+                    ValidationResult.BAD_DOWNLOAD_DATA,
                     "Failed to download data file %s: Server error: %s." % (file_uuid, error))
             if not downloaded_file:
-                return ValidationResult(False, "Data file %s was empty." % file_uuid)
+                return ValidationResult(False, ValidationResult.BAD_DOWNLOAD_DATA,
+                                        "Data file %s was empty." % file_uuid)
             if not check_downloaded_file(downloaded_file):
-                return ValidationResult(False, "Downloaded file %s is not valid." % file_uuid)
+                return ValidationResult(False, ValidationResult.BAD_DOWNLOAD_DATA,
+                                        "Downloaded file %s is not valid." % file_uuid)
         # All files downloaded ok
         return ValidationResult(True)
 
@@ -153,14 +183,13 @@ def validate_aaa_ReceiptFormat(receipt):
     if len(receipt_arr) < 2:
         return ValidationResult(
             False,
-            "Receipt must contain a header and at least one data line!")
+            ValidationResult.RECEIPT_TOO_SHORT)
 
     reader = csv.DictReader(receipt_arr, delimiter='\t')
     # Fields must be populated
     if not reader.fieldnames:
         return ValidationResult(
-            False,
-            "Receipt header must have at least 1 column!")
+            False, ValidationResult.RECEIPT_NO_HEADER)
 
     # TODO fields must match the spec
 
@@ -168,18 +197,16 @@ def validate_aaa_ReceiptFormat(receipt):
     for row in reader:
         if None in row.values():
             return ValidationResult(
-                False,
-                "Receipt data line is missing at least 1 column!")
+                False, ValidationResult.RECEIPT_MISSING_DATA_COL)
         if None in row.keys():
             return ValidationResult(
-                False,
-                "Receipt data line has at least 1 extra column!")
+                False, ValidationResult.RECEIPT_EXTRA_DATA_COL)
 
         logging.info(row)  # TODO don't print this
     # TODO : account for potential DOS line endings
     # TODO : fix encoding to be ASCII / UTF-8? Per:
     # https://docs.python.org/2/library/csv.html#csv-examples
-    return ValidationResult(True, "Receipt validated ok.")
+    return ValidationResult(True, ValidationResult.RECEIPT_OK)
 
 
 if __name__ == "__main__":
