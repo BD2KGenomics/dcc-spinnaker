@@ -1,4 +1,5 @@
 import sys
+import inspect
 import csv  # parse receipt
 import logging
 import redwood_client_lite
@@ -10,13 +11,21 @@ Validation Engine
 '''
 
 
-# Takes: information about a submission
-# returns : a ValidationResult
+# Takes: The receipt.tsv provided by the spinnaker client
+# Finds all validation_ functions in this module, and runs them in roughly alphabetical order
+# if a validation fails, returns that failed result & stops
+# otherwise returns last succeeded validation
 def run_validations(receipt):
-    result = validate_ReceiptFormat(receipt)
-    if not(result.validated):
-        return result
-    result = validate_FileExists(receipt)
+
+    all_functions = inspect.getmembers(sys.modules[__name__], inspect.isfunction)
+    validations = filter(lambda (name, fun): name.startswith("validate_"), all_functions)
+    # Placeholder in case there are no validations.
+    result = ValidationResult(False, "No validations were found for this submission!")
+
+    for (name, function) in validations:
+        result = function(receipt)
+        if not(result.validated):
+            return result
     return result
 
 
@@ -51,7 +60,7 @@ receipt is a string containing the csv receipt document.
 
 # For each item in the receipt
 # Checks that the metadata.json exists
-def validate_FileExists(receipt):
+def validate_bbb_FileExists(receipt):
 
     # Parameters - replicates ucsc-download.sh
     BASE_URL = "https://storage2.ucsc-cgl.org:5431"
@@ -137,7 +146,7 @@ def validate_FileExists(receipt):
 # and also if the fields match the specification given
 # TODO confirm that this is necessary & sufficient
 # Might a receipt have extra fields?
-def validate_ReceiptFormat(receipt):
+def validate_aaa_ReceiptFormat(receipt):
     # Attempt to parse the receipt as a tsv file with a header line
     receipt_arr = receipt.split('\n')
     # Receipt must have at least 2 rows (header + 1 data line)
@@ -173,16 +182,14 @@ def validate_ReceiptFormat(receipt):
     return ValidationResult(True, "Receipt validated ok.")
 
 
-# Fake validation for testing
-def validate_AlwaysSucceedsValidation(receipt):
-    return ValidationResult(True, "Test validation suceeded.")
-
-
 if __name__ == "__main__":
-    with open(sys.argv[1], "r") as receipt:
-        result = run_validations(receipt.read())
-        if result.validated:
-            print "Validated:"
-        else:
-            print "Failed validation:"
-        print result.response
+    if len(sys.argv) > 1:
+        with open(sys.argv[1], "r") as receipt:
+            res = run_validations(receipt.read())
+            if res.validated:
+                print "Validated:"
+            else:
+                print "Failed validation:"
+            print res.response
+    else:
+        print("Usage: python validation_engine.py receipt.tsv")
