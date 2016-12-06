@@ -10,6 +10,9 @@ RUN apk add --update uwsgi-python
 ADD ./requirements.txt /app/requirements.txt
 RUN pip install -r /app/requirements.txt
 
+# Add bash for debugging convenience
+RUN apk add --update bash 
+
 # # Install yarn
 # RUN mkdir -p /opt
 # ADD latest.tar.gz /opt/

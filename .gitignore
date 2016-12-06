@@ -5,3 +5,6 @@
 /__pycache__/
 /.cache/
 /tests/.cache/
+
+# access token for the Redwood server
+accessToken

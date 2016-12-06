@@ -1,3 +1,4 @@
+import sys
 import datetime
 import logging
 from flask import Flask, request, make_response
@@ -9,6 +10,17 @@ from flask_restplus import Resource, Api, reqparse
 
 app = Flask(__name__, static_url_path="")
 logging.basicConfig(level=logging.DEBUG)
+
+
+# uwsgi is being used only to send async jobs to the spooler.
+# it's only available when the app is run in a uwsgi context.
+# Allow the app to be run outside of that context for other
+# tasks, eg db migration.
+# this MUST be after the logging.basicConfig or logging breaks.
+try:
+    import uwsgi
+except ImportError:
+    logging.info("Couldn't import uwsgi.")
 
 
 @app.route("/")
@@ -34,6 +46,7 @@ class Submission(db.Model):
     created = db.Column(db.DateTime, default=datetime.datetime.utcnow())
     modified = db.Column(db.DateTime, default=datetime.datetime.utcnow())
     receipt = db.Column(db.Text)
+    validation_message = db.Column(db.Text)
 
     def to_dict(self):
         """ Annoyingly jsonify doesn't automatically just work... """
@@ -93,6 +106,12 @@ class SubmissionAPI(Resource):
             submission.modified = datetime.datetime.utcnow()
             db.session.commit()
             logging.info("Edited submission {}".format(id))
+            # Asynchronously kick off the validate if available
+            # The spooler callback will fetch the receipt and pass to the validator.
+            if 'uwsgi' in sys.modules:
+                uwsgi.spool({'submission_id': id})
+            else:
+                logging.debug("UWSGI not available; skipping validation.")
             return jsonify(submission=submission.to_dict())
         else:
             return make_response(jsonify(message="Submission {} does not exist".format(id)), 404)
@@ -105,6 +124,52 @@ class SubmissionAPI(Resource):
             db.session.commit()
             logging.info("Deleted submission {}".format(id))
             return jsonify(message="Deleted submission {}".format(id))
+        else:
+            return make_response(jsonify(message="Submission {} does not exist".format(id)), 404)
+
+
+"""
+Validation Engine
+"""
+
+
+@api.route("/v0/validation/<id>")
+class ValidationAPI(Resource):
+    def get(self, id):
+        """ Request a validation for a submission, without needing to update the receipt """
+        # TODO: should confirm submission exists & has receipt
+        if 'uwsgi' in sys.modules:
+            uwsgi.spool({'submission_id': id})
+        else:
+            logging.debug("UWSGI not available; skipping validation of submission {}.".format(id))
+        return make_response(jsonify(message="Submission {} queued for validation".format(id)), 200)
+
+    # PUT validation: Accept bool validated and str response, and update the submission
+    # with whether it validated or not.
+    # TODO : if we plan to actually use this endpoint, set up a secret key system:
+    # add to the Makefile generation of a random key that is available to both the
+    # validator on the server & this file; then use this key to auth requests to the endpoint.
+    @api.expect(json_parser)
+    def put(self, id):
+        """ Update a submission with the results of a validation """
+        submission = Submission.query.get(id)
+        logging.info(request.get_json())
+        did_validate = request.get_json().get("validated")
+        validation_message = request.get_json().get("response", "")
+        if submission:
+            if did_validate:
+                submission.status = "validated"
+            else:
+                submission.status = "invalid"
+            # TODO : Save old validation messages somewhere?
+            submission.validation_message = validation_message
+            submission.modified = datetime.datetime.utcnow()
+            db.session.commit()
+            logging.info("Sub {}'s validation was {}: {}".format(
+                id, did_validate, validation_message))
+            return make_response(jsonify(
+                message="Accepted validation result for {}: {}--".format(
+                    id, did_validate, validation_message)), 200)
         else:
             return make_response(jsonify(message="Submission {} does not exist".format(id)), 404)
 
