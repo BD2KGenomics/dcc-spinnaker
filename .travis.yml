@@ -15,5 +15,6 @@ script:
   - flake8 .
   - make build
   - make db
+  - sleep 5
   - make run
   - make test
