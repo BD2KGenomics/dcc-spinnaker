@@ -40,8 +40,8 @@ debug:
 
 run:
 	# Apply migrations and then run using the built image in daemon mode
-	docker run -it --rm -v `pwd`/data:/data ucsc/spinnaker python spinnaker/spinnaker.py db upgrade
-	docker run --name spinnaker -d -v `pwd`/data:/data -p 5000:5000 ucsc/spinnaker
+	docker run -it --rm --link db:db ucsc/spinnaker python spinnaker/spinnaker.py db upgrade
+	docker run --name spinnaker -d --link db:db -p 5000:5000 ucsc/spinnaker
 
 edit:
 	# Mount the local files WITHOUT auto-reload, and ssh in. For manually twiddling the files in the docker context
