@@ -1,6 +1,7 @@
 import sys
 import datetime
 import logging
+import uuid
 from flask import Flask, request, make_response
 from flask.json import jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -41,7 +42,7 @@ manager.add_command("db", MigrateCommand)
 
 
 class Submission(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     # status = db.Column(db.Enum("new", "received", "validated",
     #                            "invalid", "signed"), default="new")
     status = db.Column(db.Text, default="new")

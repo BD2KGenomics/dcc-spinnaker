@@ -10,8 +10,12 @@ db:
           postgres
 
 
-reset:
-	sudo rm -rf migrations
+reset: delete_db migrate upgrade
+
+delete_db:
+	docker exec -it db dropdb -U spinnaker spinnaker || true
+	docker exec -it db createdb -U spinnaker spinnaker || true
+	sudo rm -rf migrations || true
 	docker run -it --rm -v `pwd`:/app --link db:db ucsc/spinnaker python spinnaker/spinnaker.py db init
 
 upgrade:
