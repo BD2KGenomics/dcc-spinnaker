@@ -2,5 +2,6 @@
 !.git/HEAD
 !.git/refs/
 !.git/packed-refs
-data
+data/
+validator-downloader/
 __pycache__

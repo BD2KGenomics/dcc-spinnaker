@@ -1,13 +1,32 @@
 build:
 	docker build -t ucsc/spinnaker .
 
-debug:
+db:
+	docker run -d --name db \
+          -v `pwd`/data:/var/lib/postgresql/data \
+          -e POSTGRES_PASSWORD=gi123 \
+          -e POSTGRES_USER=spinnaker \
+          -e POSTGRES_DB=spinnaker \
+          postgres
+
+
+reset:
+	sudo rm -rf migrations
+	docker run -it --rm -v `pwd`:/app --link db:db ucsc/spinnaker python spinnaker/spinnaker.py db init
+
+upgrade:
 	# Create the database if it doesn't exist and apply any migrations if it does
-	docker run -it --rm -v `pwd`:/app -v `pwd`/data:/data ucsc/spinnaker python spinnaker/spinnaker.py db upgrade
+	docker run -it --rm -v `pwd`:/app --link db:db ucsc/spinnaker python spinnaker/spinnaker.py db upgrade
+
+migrate:
+	# Create any required migrations
+	docker run -it --rm -v `pwd`:/app --link db:db ucsc/spinnaker python spinnaker/spinnaker.py db migrate
+
+debug:
 	# Run using the local files for debugging with auto-reloading
 	docker run --name spinnaker --rm -it \
 		-v `pwd`:/app \
-		-v `pwd`/data:/data \
+		--link db:db \
 		-p 5000:5000 \
 		-e FLASK_DEBUG='True' \
 		ucsc/spinnaker uwsgi --ini uwsgi.ini --honour-stdin --python-autoreload=1 --processes=1 --threads=1
@@ -31,14 +50,7 @@ edit:
 
 stop:
 	docker stop spinnaker || true && docker rm spinnaker || true
-
-reset:
-	sudo rm -rf data migrations
-	docker run -it --rm -v `pwd`:/app -v `pwd`/data:/data ucsc/spinnaker python spinnaker/spinnaker.py db init
-
-migrate:
-	# Create any required migrations
-	docker run -it --rm -v `pwd`:/app -v `pwd`/data:/data ucsc/spinnaker python spinnaker/spinnaker.py db migrate
+	docker stop db || true && docker rm db || true
 
 test:
 	# Run pytest inside the running container from debug or run
