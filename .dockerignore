@@ -3,5 +3,5 @@
 !.git/refs/
 !.git/packed-refs
 data/
-validator-downloader/
+validator-downloader/accessToken
 __pycache__
