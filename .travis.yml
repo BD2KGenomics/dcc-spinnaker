@@ -14,5 +14,7 @@ install:
 script:
   - flake8 .
   - make build
+  - make db
+  - make upgrade
   - make run
   - make test
