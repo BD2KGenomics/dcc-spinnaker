@@ -33,6 +33,7 @@ debug:
 		--link db:db \
 		-p 5000:5000 \
 		-e FLASK_DEBUG='True' \
+		-e UCSC_DCC_TOKEN=$(UCSC_DCC_TOKEN) \
 		ucsc/spinnaker uwsgi --ini uwsgi.ini --honour-stdin --python-autoreload=1 --processes=1 --threads=1
 		#ucsc/spinnaker python spinnaker/spinnaker.py runserver --host 0.0.0.0
 		# To run in uwsgi with reloading use the following, but flask debugger doesn't work...

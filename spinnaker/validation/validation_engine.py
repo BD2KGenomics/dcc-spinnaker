@@ -1,4 +1,5 @@
 import sys
+import os
 import inspect
 import csv  # parse receipt
 import logging
@@ -88,7 +89,6 @@ def validate_bbb_FileExists(receipt):
 
     # Parameters - replicates ucsc-download.sh
     BASE_URL = "https://storage2.ucsc-cgl.org:5431"
-    ACCESS_TOKEN = "/app/validator-downloader/accessToken"
 
     def validate(receipt):
         receipt_arr = receipt.split('\n')
@@ -146,17 +146,16 @@ def validate_bbb_FileExists(receipt):
     # TODO : is this really the best way to specify?
     def download_file(uuid, partial_download):
         # Get the access token
-        try:
-            with open(ACCESS_TOKEN, "r") as tokenfile:
-                token = tokenfile.read().rstrip()
-        except IOError:
-            logging.info("Couldn't find download access token at path {}".format(ACCESS_TOKEN))
+        if not os.getenv("UCSC_DCC_TOKEN"):
+            logging.error("Must set UCSC_DCC_TOKEN")
             return False
 
         if partial_download:
-            result = redwood_client_lite.download_partial_file(BASE_URL, uuid, token)
+            result = redwood_client_lite.download_partial_file(
+                BASE_URL, uuid, os.getenv("UCSC_DCC_TOKEN"))
         else:
-            result = redwood_client_lite.download_json(BASE_URL, uuid, token)
+            result = redwood_client_lite.download_json(
+                BASE_URL, uuid, os.getenv("UCSC_DCC_TOKEN"))
         return result
 
     def check_downloaded_json(json):
