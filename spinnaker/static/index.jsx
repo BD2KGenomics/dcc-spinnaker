@@ -1,116 +1,44 @@
-function ErrorMessage(props) {
-  let spaceAndWhat = "";
-  if (props.what) {
-    spaceAndWhat = " " + props.what;
-  }
+class SubmissionsList extends React.Component {
 
-  return (
-    <div className="ui negative icon message">
-      <i className="bug icon"></i>
-      <div className="content">
-        <div className="header">
-          Uh oh...
-        </div>
-        <p>
-          Something went wrong{spaceAndWhat}. Please try again.
-        </p>
-      </div>
-    </div>
-  );
-}
-
-class ListSubmissions extends React.Component {
-  render() {
-    if (this.props.loadingStatus === "done") {
-      if (this.props.submissions.length === 0) {
-        return (
-          <div className="ui huge message">
-            <div className="header">
-              No submissions
-            </div>
-            <p>
-              You don't have any submissions... yet!
-            </p>
-
-            <p>
-              You can add submissions with the command line interface thingy.
-              Yeah. Cool.
-            </p>
-          </div>
-        )
-      } else {
-        return (
-          <table className="ui celled table">
-            <thead>
-              <tr>
-                <th>Header</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Yo</td>
-              </tr>
-            </tbody>
-          </table>
-        )
-      }
-    } else if (this.props.loadingStatus === "loading") {
-      return (
-        <div className="ui icon message">
-          <i className="notched circle loading icon"></i>
-          <div className="content">
-            <div className="header">
-              One moment please...
-            </div>
-            <p>
-              We're fetching that data for you.
-            </p>
-          </div>
-        </div>
-      )
-    }
-
-    return (
-      <ErrorMessage what="fetching submissions from the server"/>
-    )
-  }
-}
-
-class ListSubmissionsPage extends React.Component {
-  constructor() {
-    super();
-
+  constructor(props) {
+    super(props);
     this.state = {
-      // can be: "loading", "error", or "ready"
-      loadingStatus: "loading",
+      submissions: []
     };
+  }
 
-    $.getJSON("/v0/submissions")
-      .done((newState) => {
-        _.extend(newState, {
-          loadingStatus: "ready"
-        });
+  componentDidMount() {
+		fetch("http://rob.medbook.io:5000/v0/submissions")
+    .then(response => response.json())
+    .then(json => {
+      this.setState(json);
+    });  
+  }
 
-        this.setState(newState);
-      })
-      .fail(() => {
-        this.setState({
-          loadingStatus: "error"
-        });
-      });
+	handleClick(e) {
+    console.log(e.target.dataset.id);
   }
 
   render() {
-    let hello = "sdfsdf";
-
     return (
-      <div className="ui container">
-        <h1>Spinnaker submissions</h1>
-
-        <ListSubmissions />
-      </div>
-    )
+      <cgl-data-table-container>
+				<cgl-data-table>
+					<cgl-data-table-row>
+						<cgl-data-table-cell>Created</cgl-data-table-cell>
+						<cgl-data-table-cell>ID</cgl-data-table-cell>
+						<cgl-data-table-cell>Status</cgl-data-table-cell>
+					</cgl-data-table-row>
+					{this.state.submissions.map(submission =>
+					<cgl-data-table-row key={submission.id} data-id={submission.id} onClick={this.handleClick}>
+						<cgl-data-table-cell>{submission.created}</cgl-data-table-cell>
+						<cgl-data-table-cell>{submission.id}</cgl-data-table-cell>
+						<cgl-data-table-cell>{submission.status}</cgl-data-table-cell>
+					</cgl-data-table-row>
+					)}
+				</cgl-data-table>
+      </cgl-data-table-container>
+    );
   }
 }
 
-ReactDOM.render(<ListSubmissionsPage />, document.getElementById("react-root"));
+ReactDOM.render(<SubmissionsList/>, document.getElementById("submissions-list"));

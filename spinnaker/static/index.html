@@ -1,39 +1,51 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Spinnaker Submissions</title>
+	<head>
+		<meta charset="utf-8">
+		<title>Submissions</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- Underscore -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+		<link rel="apple-touch-icon-precomposed" sizes="57x57" href="https://clevercanary.github.io/ucsc-cgl-style-guide/images/favicon/apple-touch-icon-57x57.png" />
+		<link rel="apple-touch-icon-precomposed" sizes="114x114" href="https://clevercanary.github.io/ucsc-cgl-style-guide/images/favicon/apple-touch-icon-114x114.png" />
+		<link rel="apple-touch-icon-precomposed" sizes="72x72" href="https://clevercanary.github.io/ucsc-cgl-style-guide/images/favicon/apple-touch-icon-72x72.png" />
+		<link rel="apple-touch-icon-precomposed" sizes="144x144" href="https://clevercanary.github.io/ucsc-cgl-style-guide/images/favicon/apple-touch-icon-144x144.png" />
+		<link rel="apple-touch-icon-precomposed" sizes="60x60" href="https://clevercanary.github.io/ucsc-cgl-style-guide/images/favicon/apple-touch-icon-60x60.png" />
+		<link rel="apple-touch-icon-precomposed" sizes="120x120" href="https://clevercanary.github.io/ucsc-cgl-style-guide/images/favicon/apple-touch-icon-120x120.png" />
+		<link rel="apple-touch-icon-precomposed" sizes="76x76" href="https://clevercanary.github.io/ucsc-cgl-style-guide/images/favicon/apple-touch-icon-76x76.png" />
+		<link rel="apple-touch-icon-precomposed" sizes="152x152" href="https://clevercanary.github.io/ucsc-cgl-style-guide/images/favicon/apple-touch-icon-152x152.png" />
+		<link rel="icon" type="image/png" href="https://clevercanary.github.io/ucsc-cgl-style-guide/images/favicon/favicon-196x196.png" sizes="196x196" />
+		<link rel="icon" type="image/png" href="https://clevercanary.github.io/ucsc-cgl-style-guide/images/favicon/favicon-96x96.png" sizes="96x96" />
+		<link rel="icon" type="image/png" href="https://clevercanary.github.io/ucsc-cgl-style-guide/images/favicon/favicon-32x32.png" sizes="32x32" />
+		<link rel="icon" type="image/png" href="https://clevercanary.github.io/ucsc-cgl-style-guide/images/favicon/favicon-16x16.png" sizes="16x16" />
+		<link rel="icon" type="image/png" href="https://clevercanary.github.io/ucsc-cgl-style-guide/images/favicon/favicon-128.png" sizes="128x128" />
+		<meta name="msapplication-TileColor" content="#FFFFFF" />
+		<meta name="msapplication-TileImage" content="mstile-144x144.png" />
+		<meta name="msapplication-square70x70logo" content="mstile-70x70.png" />
+		<meta name="msapplication-square150x150logo" content="mstile-150x150.png" />
+		<meta name="msapplication-wide310x150logo" content="mstile-310x150.png" />
+		<meta name="msapplication-square310x310logo" content="mstile-310x310.png" />
 
-    <!-- Semantic UI -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/semantic-ui/2.2.6/semantic.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/semantic-ui/2.2.6/semantic.min.js"></script>
+		<link rel="stylesheet" href="https://clevercanary.github.io/ucsc-cgl-style-guide/styles/styles.css">
+		<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-    <!-- React -->
-    <!-- TODO: use minified .js files -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.1.0/react.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.1.0/react-dom.js"></script>
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/JSXTransformer.js"></script>
-
-    <!-- App code -->
-    <script type="text/jsx" src="index.jsx"></script>
-	</style>
-  </head>
-  <body>
-    <div id="react-root">
-      <div class="ui huge icon message"
-          style="max-width: 500px; margin: auto; position: absolute;
-                 top: 50%; left: 50%; transform: translate(-50%, -50%);">
-        <i class="notched circle loading icon"></i>
-        <div class="content">
-          <div class="header">
-            One moment please...
-          </div>
-          <p>Spinnaker is loading!</p>
-        </div>
-      </div>
-    </div>
-  </body>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.4.1/react.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.4.1/react-dom.min.js"></script>
+		<script src="http://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/JSXTransformer.js"></script>
+		<script type="text/jsx" src="index.jsx"></script>
+	</head>
+	<body>
+		<div class="cgl-site layout-column layout-fill">
+			<header>
+			</header>
+			<main class="layout-column layout-padding flex">
+			<div class="snap-960">
+				<h2 class="md-headline">Spinnaker Submissions</h2>
+				<div id="submissions-list"></div>
+			</div>
+			</main>
+			<footer>
+			</footer>
+		</div>
+		<script type="text/javascript" src="https://clevercanary.github.io/ucsc-cgl-style-guide/scripts/cgl-hamburger.component.js"></script>
+	</body>
 </html>
