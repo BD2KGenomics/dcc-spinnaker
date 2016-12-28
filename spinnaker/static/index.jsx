@@ -15,8 +15,13 @@ class SubmissionsList extends React.Component {
     });  
   }
 
-	handleClick(e) {
-    console.log(e.target.dataset.id);
+	handleClick(submission) {
+    // If there is a receipt download it for the user
+    if (submission.receipt) {
+      let receipt = "data:text/tab-separated-values," 
+        + encodeURIComponent(submission.receipt);
+      window.open(receipt);
+    }
   }
 
   render() {
@@ -29,10 +34,13 @@ class SubmissionsList extends React.Component {
 						<cgl-data-table-cell>Status</cgl-data-table-cell>
 					</cgl-data-table-row>
 					{this.state.submissions.map(submission =>
-					<cgl-data-table-row key={submission.id} data-id={submission.id} onClick={this.handleClick}>
+					<cgl-data-table-row key={submission.id} onClick={e => this.handleClick(submission)}>
 						<cgl-data-table-cell>{submission.created}</cgl-data-table-cell>
 						<cgl-data-table-cell>{submission.id}</cgl-data-table-cell>
-						<cgl-data-table-cell>{submission.status}</cgl-data-table-cell>
+						<cgl-data-table-cell>
+              {submission.status}
+              {submission.validation_message ? ": " + submission.validation_message : ""}
+            </cgl-data-table-cell>
 					</cgl-data-table-row>
 					)}
 				</cgl-data-table>
