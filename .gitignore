@@ -2,5 +2,9 @@
 .DS_Store
 *.pyc
 /data/
+/__pycache__/
 /.cache/
 /tests/.cache/
+
+# access token for the Redwood server
+accessToken
