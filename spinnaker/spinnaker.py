@@ -1,6 +1,7 @@
 import sys
 import datetime
 import logging
+import uuid
 from flask import Flask, request, make_response
 from flask.json import jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -31,7 +32,7 @@ def index():
 """
 Database and Models
 """
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////data/spinnaker.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = "postgres://spinnaker:gi123@db/spinnaker"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
@@ -41,8 +42,10 @@ manager.add_command("db", MigrateCommand)
 
 
 class Submission(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    status = db.Column(db.Enum("new", "received", "validated", "invalid", "signed"), default="new")
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    # status = db.Column(db.Enum("new", "received", "validated",
+    #                            "invalid", "signed"), default="new")
+    status = db.Column(db.Text, default="new")
     created = db.Column(db.DateTime, default=datetime.datetime.utcnow())
     modified = db.Column(db.DateTime, default=datetime.datetime.utcnow())
     receipt = db.Column(db.Text)
