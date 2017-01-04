@@ -3,6 +3,11 @@
 # Spinnaker Server
 Receives receipts from the spinnaker upload client and validates the submissions
 
+# Environment
+
+Spinnaker accesses the redwood storage system when validating submissions via
+a token stored in the UCSC_DCC_TOKEN environment file.
+
 # Run
 
 Start the database container:
