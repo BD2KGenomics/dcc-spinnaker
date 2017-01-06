@@ -16,7 +16,7 @@ class SubmissionsList extends React.Component {
     });  
   }
 
-	handleClick(submission) {
+	handleSubmissionClick(submission) {
     submission == this.state.expanded ? 
       this.setState({expanded: null}) : this.setState({expanded: submission});
     // If there is a receipt download it for the user
@@ -36,18 +36,23 @@ class SubmissionsList extends React.Component {
 						<cgl-data-table-cell>ID</cgl-data-table-cell>
 						<cgl-data-table-cell>Status</cgl-data-table-cell>
 					</cgl-data-table-row>
-					{this.state.submissions.map(submission =>
-					<cgl-data-table-row onClick={this.handleClick.bind(this, submission)}>
+					{this.state.submissions.map(submission => [
+					<cgl-data-table-row onClick={this.handleSubmissionClick.bind(this, submission)}>
 						<cgl-data-table-cell>{submission.created}</cgl-data-table-cell>
 						<cgl-data-table-cell>{submission.id}</cgl-data-table-cell>
-						<cgl-data-table-cell>
-              {submission.status}
-            </cgl-data-table-cell>
-            {this.state.expanded == submission &&
-              <b>submission.validation_message</b>
+						<cgl-data-table-cell>{submission.status}</cgl-data-table-cell>
+					</cgl-data-table-row>,
+          <div>
+            {this.state.expanded == submission ?
+              <cgl-data-table-row>
+                <cgl-data-table-cell>
+                  <div>{submission.validation_message}</div>
+                </cgl-data-table-cell>
+              </cgl-data-table-row>
+              : <noscript />
             }
-					</cgl-data-table-row>
-					)}
+          </div>
+          ])}
 				</cgl-data-table>
       </cgl-data-table-container>
     );
