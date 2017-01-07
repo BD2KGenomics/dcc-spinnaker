@@ -46,15 +46,15 @@ class SubmissionsList extends React.Component {
 						<cgl-data-table-cell>{submission.status}</cgl-data-table-cell>
             <cgl-data-table-cell>
               <a href="#" onClick={this.handleDownloadReceipt.bind(this, submission)}>
-                {submission.receipt && submission.receipt.split('\t').length}
+                {submission.receipt && submission.receipt.split('\n').length - 2}
               </a>
             </cgl-data-table-cell>
 					</cgl-data-table-row>,
           <div>
-            {submission.receipt && this.state.expanded == submission ?
+            {submission.receipt && submission.status == "invalid" && this.state.expanded == submission ?
               <cgl-data-table-row onClick={this.handleDownloadReceipt.bind(this, submission)}>
                 <cgl-data-table-cell>
-                  <div>{submission.validation_message}</div>
+                  <div>{submission.validation_details}</div>
                 </cgl-data-table-cell>
               </cgl-data-table-row>
               : <noscript />

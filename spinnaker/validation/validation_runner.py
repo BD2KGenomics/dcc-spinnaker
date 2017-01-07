@@ -29,11 +29,12 @@ def spooler(job_info):
         try:
             receipt = json.loads(r.text)["submission"]["receipt"]
         except KeyError:
-            myjson = {"validated": False, "response": "couldn't get receipt"}
+            myjson = {"validated": False, "response": "couldn't get receipt", "details": ""}
         else:
             validation_result = validation_engine.run_validations(receipt)
             myjson = {"validated": validation_result.validated,
-                      "response": validation_result.response}
+                      "response": validation_result.response,
+                      "details": validation_result.details}
 
     r = requests.put("{}/v0/validation/{}".format(server, id), json=myjson)
     # TODO : check that r worked

@@ -110,11 +110,11 @@ def validate_bbb_FileExists(receipt):
             # Download the metadata and check it for emptyiness
             try:
                 downloaded_json = download_file(metadata, False)
-            except redwood_client_lite.RedwoodServerError as error:
+            except redwood_client_lite.RedwoodServerError:
                 return ValidationResult(
                     False,
                     ValidationResult.BAD_DOWNLOAD_METADATA,
-                    "Failed to download metadata.json %s: Server error: %s." % (metadata, error))
+                    "Failed to download metadata.json {}".format(metadata))
             if not downloaded_json:
                 return ValidationResult(False, ValidationResult.BAD_DOWNLOAD_METADATA,
                                         "metadata.json file %s was empty." % metadata)
@@ -125,11 +125,11 @@ def validate_bbb_FileExists(receipt):
             # Also download and check the beginning of the data file
             try:
                 downloaded_file = download_file(file_uuid, True)
-            except redwood_client_lite.RedwoodServerError as error:
+            except redwood_client_lite.RedwoodServerError:
                 return ValidationResult(
                     False,
                     ValidationResult.BAD_DOWNLOAD_DATA,
-                    "Failed to download data file %s: Server error: %s." % (file_uuid, error))
+                    "Failed to download data file {}".format(file_uuid))
             if not downloaded_file:
                 return ValidationResult(False, ValidationResult.BAD_DOWNLOAD_DATA,
                                         "Data file %s was empty." % file_uuid)
