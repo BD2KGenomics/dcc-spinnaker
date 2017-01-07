@@ -75,8 +75,9 @@ json_parser.add_argument("json", location="json")
 class SubmissionsAPI(Resource):
 
     def get(self):
-        """ Get a list of all submissions """
-        return jsonify(submissions=[s.to_dict() for s in Submission.query.all()])
+        """ Get a list of all submissions in reverse chronological order """
+        return jsonify(submissions=[s.to_dict() for s in
+                                    Submission.query.order_by(Submission.created.desc()).all()])
 
     @api.expect(json_parser)
     def post(self):
