@@ -50,6 +50,7 @@ class Submission(db.Model):
     modified = db.Column(db.DateTime, default=datetime.datetime.utcnow())
     receipt = db.Column(db.Text)
     validation_message = db.Column(db.Text)
+    validation_details = db.Column(db.Text)
 
     def to_dict(self):
         """ Annoyingly jsonify doesn't automatically just work... """
@@ -74,8 +75,9 @@ json_parser.add_argument("json", location="json")
 class SubmissionsAPI(Resource):
 
     def get(self):
-        """ Get a list of all submissions """
-        return jsonify(submissions=[s.to_dict() for s in Submission.query.all()])
+        """ Get a list of all submissions in reverse chronological order """
+        return jsonify(submissions=[s.to_dict() for s in
+                                    Submission.query.order_by(Submission.created.desc()).all()])
 
     @api.expect(json_parser)
     def post(self):
@@ -159,6 +161,7 @@ class ValidationAPI(Resource):
         logging.info(request.get_json())
         did_validate = request.get_json().get("validated")
         validation_message = request.get_json().get("response", "")
+        validation_details = request.get_json().get("details", "")
         if submission:
             if did_validate:
                 submission.status = "validated"
@@ -166,6 +169,7 @@ class ValidationAPI(Resource):
                 submission.status = "invalid"
             # TODO : Save old validation messages somewhere?
             submission.validation_message = validation_message
+            submission.validation_details = validation_details
             submission.modified = datetime.datetime.utcnow()
             db.session.commit()
             logging.info("Sub {}'s validation was {}: {}".format(
