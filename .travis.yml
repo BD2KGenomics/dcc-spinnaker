@@ -13,8 +13,7 @@ install:
 
 script:
   - flake8 .
-  - make build
-  - make db
+  - docker-compose build
+  - docker-compose up
   - sleep 5
-  - make run
   - make test
