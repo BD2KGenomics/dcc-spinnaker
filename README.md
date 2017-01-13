@@ -1,24 +1,19 @@
 [![Build Status](https://travis-ci.org/BD2KGenomics/dcc-spinnaker.svg?branch=master)](https://travis-ci.org/BD2KGenomics/dcc-spinnaker)
+[![Docker Repository on Quay](https://quay.io/repository/ucsc_cgl/dcc-spinnaker/status "Docker
+Repository on Quay")](https://quay.io/repository/ucsc_cgl/dcc-spinnaker)
 
 # Spinnaker Server
 Receives receipts from the spinnaker upload client and validates the submissions
 
 # Environment
 
-Spinnaker accesses the redwood storage system when validating submissions via
-a token stored in the UCSC_DCC_TOKEN environment file.
+Spinnaker accesses the storage system when validating submissions via
+a token stored in the UCSC_STORAGE_TOKEN environment file.
 
 # Run
 
-Start the database container:
+    docker-compose up
 
-    make db
-
-Run the spinnaker server in a container:
-
-    make run
-
-NOTE: make run will also create and migrate the database if required
 
 # Build, Debug and Test Locally
 
