@@ -1,0 +1,26 @@
+version: '2'
+
+volumes:
+  postgres:
+
+services:
+  db:
+    image: postgres:9.6-alpine
+    environment:
+      POSTGRES_PASSWORD: gi123
+      POSTGRES_USER: spinnaker
+      POSTGRES_DB: spinnaker
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
+  spinnaker:
+    build: .
+    image: ucsc_cgl/spinnaker
+    environment:
+      UCSC_STORAGE_TOKEN:
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    links:
+      - db

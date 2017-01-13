@@ -5,20 +5,13 @@ Receives receipts from the spinnaker upload client and validates the submissions
 
 # Environment
 
-Spinnaker accesses the redwood storage system when validating submissions via
-a token stored in the UCSC_DCC_TOKEN environment file.
+Spinnaker accesses the storage system when validating submissions via
+a token stored in the UCSC_STORAGE_TOKEN environment file.
 
 # Run
 
-Start the database container:
+    docker-compose up
 
-    make db
-
-Run the spinnaker server in a container:
-
-    make run
-
-NOTE: make run will also create and migrate the database if required
 
 # Build, Debug and Test Locally
 

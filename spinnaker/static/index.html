@@ -30,22 +30,108 @@
 
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.4.1/react.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.4.1/react-dom.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.21.1/babel.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.21.1/babel.min.js"></script>
 		<script type="text/babel" src="index.jsx"></script>
 	</head>
 	<body>
-		<div class="cgl-site layout-column layout-fill">
-			<header>
-			</header>
-			<main class="layout-column layout-padding flex">
-			<div class="snap-960">
-				<h2 class="md-headline">Spinnaker Submissions</h2>
-				<div id="submissions-list"></div>
-			</div>
-			</main>
-			<footer>
-			</footer>
+		<header>
+			<md-toolbar>
+				<md-toolbar-row>
+					<img src="https://clevercanary.github.io/ucsc-cgl-style-guide/images/logos/ucsc-gi/logo-ucsc-gi@1x.png" srcset="https://clevercanary.github.io/ucsc-cgl-style-guide/images/logos/ucsc-gi/logo-ucsc-gi@2x.png 2x, https://clevercanary.github.io/ucsc-cgl-style-guide/images/logos/ucsc-gi/logo-ucsc-gi@3x.png 3x">
+
+					<!-- Hamburger start -->
+					<button md-icon-button menu-open>
+						<span class="md-button-wrapper">
+							<md-icon role="img" class="material-icons">menu</md-icon>
+						</span>
+					</button>
+					<button md-icon-button menu-close>
+						<span class="md-button-wrapper">
+							<md-icon role="img" class="material-icons">close</md-icon>
+						</span>
+					</button>
+					<!-- Hamburger end -->
+
+					<!-- Nav start -->
+					<cc-toolbar-nav>
+						<cc-toolbar-nav-item>
+							<a href="../index.html">Analysis Core</a>
+						</cc-toolbar-nav-item>
+						<cc-toolbar-nav-item>
+							<a href="index.html">File Browser</a>
+						</cc-toolbar-nav-item>
+						<cc-toolbar-nav-item>
+							<a href="../boardwalk.html">Boardwalk</a>
+						</cc-toolbar-nav-item>
+						<cc-toolbar-nav-item>
+							<a href="../redwood.html">Redwood</a>
+						</cc-toolbar-nav-item>
+						<cc-toolbar-nav-item class="active">
+							<a href="../">Spinnaker</a>
+						</cc-toolbar-nav-item>
+						<cc-toolbar-nav-item>
+							<a href="https://ucsc-cgl.atlassian.net/wiki/">Wiki</a>
+						</cc-toolbar-nav-item>
+						<cc-toolbar-nav-item>
+							<a href="../about.html">About</a>
+						</cc-toolbar-nav-item>
+						<cc-toolbar-nav-item>
+							<a href="../help.html">Help</a>
+						</cc-toolbar-nav-item>
+					</cc-toolbar-nav>
+					<!-- Nav end -->
+
+				</md-toolbar-row>
+			</md-toolbar>
+			<md-toolbar class="subheader"> <!-- Material Design-based toolbar, note "subheader" CSS class -->
+				<md-toolbar-row> <!-- Required for correct alignment of child elements -->
+					<span class="md-title">Spinnaker</span>
+				</md-toolbar-row>
+			</md-toolbar>
+		</header>
+		<main class="layout-column layout-padding flex">
+		<div class="snap-960">
+			<h2 class="md-headline">Spinnaker Submissions</h2>
+			<div id="submissions-list"></div>
 		</div>
-		<!-- <script type="text/javascript" src="https://clevercanary.github.io/ucsc-cgl-style-guide/scripts/cgl-hamburger.component.js"></script> -->
+		</main>
+		<footer>
+			<div class="cgl-links layout-column layout-gt-sm-row layout-padding">
+
+				<!-- Top row, left-hand links on small + devices -->
+				<cgl-footer-nav class="layout-column layout-gt-sm-row">
+					<cgl-footer-nav-item>
+						<a href="#">UCSC</a>
+					</cgl-footer-nav-item>
+					<cgl-footer-nav-item>
+						<a href="#">UCSC Genomics Institute</a>
+					</cgl-footer-nav-item>
+					<cgl-footer-nav-item>
+						<a href="#">UCSC Computational Genomics Laboratory</a>
+					</cgl-footer-nav-item>
+				</cgl-footer-nav>
+
+				<!-- Top row, right-hand links on small + devices -->
+				<cgl-footer-nav class="layout-column layout-gt-sm-row">
+					<cgl-footer-nav-item>
+						<a href="#">Email</a>
+					</cgl-footer-nav-item>
+					<cgl-footer-nav-item>
+						<a href="#">Facebook</a>
+					</cgl-footer-nav-item>
+					<cgl-footer-nav-item>
+						<a href="#">Twitter</a>
+					</cgl-footer-nav-item>
+				</cgl-footer-nav>
+
+			</div>
+
+			<!-- Copyright row -->
+			<div class="cgl-disclaimer layout-column layout-gt-sm-row">
+				<span>Copyright © 2016, The Regents of the University of California, Santa Cruz.</span> <span>All Rights Reserved. Apache-2.0 licence.</span>
+			</div>
+
+		</footer>
+		<script type="text/javascript" src="https://clevercanary.github.io/ucsc-cgl-style-guide/scripts/cgl-hamburger.component.js"></script>
 	</body>
 </html>

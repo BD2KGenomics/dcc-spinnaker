@@ -1,6 +1,6 @@
 build:
 	# Build spinnaker into a local container
-	docker build -t ucsc/spinnaker .
+	docker build -t ucsc_cgl/spinnaker .
 
 debug:
 	# Run using the local files for debugging with auto-reloading
@@ -19,7 +19,7 @@ run:
 
 test:
 	# Run pytest inside the running container from debug or run
-	docker exec spinnaker py.test -p no:cacheprovider -s -x
+	docker exec dccspinnaker_spinnaker_1 py.test -p no:cacheprovider -s -x
 
 db:
 	# Run a local postgres database in a container
@@ -38,7 +38,10 @@ migrate:
 	# Create any required migrations
 	docker run -it --rm -v `pwd`:/app --link db:db ucsc/spinnaker python spinnaker/spinnaker.py db migrate
 
-reset: delete_db migrate upgrade
+reset:
+	docker-compose stop
+	docker-compose rm -f
+	docker volume rm dccspinnaker_postgres
 
 delete_db:
 	docker exec -it db dropdb -U spinnaker spinnaker || true

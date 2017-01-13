@@ -146,16 +146,16 @@ def validate_bbb_FileExists(receipt):
     # TODO : is this really the best way to specify?
     def download_file(uuid, partial_download):
         # Get the access token
-        if not os.getenv("UCSC_DCC_TOKEN"):
-            logging.error("Must set UCSC_DCC_TOKEN")
+        if not os.getenv("UCSC_STORAGE_TOKEN"):
+            logging.error("Must set UCSC_STORAGE_TOKEN")
             return False
 
         if partial_download:
             result = redwood_client_lite.download_partial_file(
-                BASE_URL, uuid, os.getenv("UCSC_DCC_TOKEN"))
+                BASE_URL, uuid, os.getenv("UCSC_STORAGE_TOKEN"))
         else:
             result = redwood_client_lite.download_json(
-                BASE_URL, uuid, os.getenv("UCSC_DCC_TOKEN"))
+                BASE_URL, uuid, os.getenv("UCSC_STORAGE_TOKEN"))
         return result
 
     def check_downloaded_json(json):
