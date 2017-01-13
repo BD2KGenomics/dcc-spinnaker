@@ -1,4 +1,6 @@
 [![Build Status](https://travis-ci.org/BD2KGenomics/dcc-spinnaker.svg?branch=master)](https://travis-ci.org/BD2KGenomics/dcc-spinnaker)
+[![Docker Repository on Quay](https://quay.io/repository/ucsc_cgl/dcc-spinnaker/status "Docker
+Repository on Quay")](https://quay.io/repository/ucsc_cgl/dcc-spinnaker)
 
 # Spinnaker Server
 Receives receipts from the spinnaker upload client and validates the submissions
