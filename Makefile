@@ -1,6 +1,6 @@
 build:
 	# Build spinnaker into a local container
-	docker build -t ucsc_cgl/spinnaker .
+	docker build -t quay.io/ucsc_cgl/dcc-spinnaker .
 
 debug:
 	# Run using the local files for debugging with auto-reloading
@@ -14,8 +14,7 @@ debug:
 
 run:
 	# Apply migrations and then run using the built image in daemon mode
-	docker run -it --rm --link db:db ucsc/spinnaker python spinnaker/spinnaker.py db upgrade
-	docker run --name spinnaker -d --link db:db -p 5000:5000 ucsc/spinnaker
+	docker-compose up
 
 test:
 	# Run pytest inside the running container from debug or run
@@ -36,20 +35,9 @@ upgrade:
 
 migrate:
 	# Create any required migrations
-	docker run -it --rm -v `pwd`:/app --link db:db ucsc/spinnaker python spinnaker/spinnaker.py db migrate
+	docker run -it --rm -v `pwd`:/app --link db:db quay.io/ucsc_cgl/dcc-spinnaker python spinnaker/spinnaker.py db migrate
 
 reset:
 	docker-compose stop
 	docker-compose rm -f
 	docker volume rm dccspinnaker_postgres
-
-delete_db:
-	docker exec -it db dropdb -U spinnaker spinnaker || true
-	docker exec -it db createdb -U spinnaker spinnaker || true
-	sudo rm -rf migrations || true
-	docker run -it --rm -v `pwd`:/app --link db:db ucsc/spinnaker python spinnaker/spinnaker.py db init
-
-stop:
-	# Stop and remove all containers
-	docker stop spinnaker || true && docker rm spinnaker || true
-	docker stop db || true && docker rm db || true
