@@ -9,7 +9,7 @@ class SubmissionsList extends React.Component {
   }
 
   componentDidMount() {
-		fetch("http://rob.medbook.io:5000/v0/submissions")
+		fetch("/v0/submissions")
     .then(response => response.json())
     .then(json => {
       this.setState(json);
