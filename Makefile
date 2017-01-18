@@ -3,22 +3,30 @@ build:
 	docker build -t quay.io/ucsc_cgl/dcc-spinnaker .
 
 debug:
+	docker-compose -f docker-compose-debug.yml up
 	# Run using the local files for debugging with auto-reloading
-	docker run --name spinnaker --rm -it \
-		-v `pwd`:/app \
-		--link db:db \
-		-p 5000:5000 \
-		-e FLASK_DEBUG='True' \
-		-e UCSC_DCC_TOKEN=$(UCSC_DCC_TOKEN) \
-		ucsc/spinnaker uwsgi --ini uwsgi.ini --honour-stdin --python-autoreload=1 --processes=1 --threads=1
+	# docker run --name spinnaker --rm -it \
+	# 	-v `pwd`:/app \
+	# 	--link db:db \
+	# 	-p 5000:5000 \
+	# 	-e FLASK_DEBUG='True' \
+	# 	-e UCSC_DCC_TOKEN=$(UCSC_DCC_TOKEN) \
+	# 	ucsc/spinnaker uwsgi --ini uwsgi.ini --honour-stdin --python-autoreload=1 --processes=1 --threads=1
 
 run:
 	# Apply migrations and then run using the built image in daemon mode
 	docker-compose up
 
+stop:
+	docker-compose down
+
 test:
 	# Run pytest inside the running container from debug or run
 	docker exec dccspinnaker_spinnaker_1 py.test -p no:cacheprovider -s -x
+
+populate:
+	# Populate with fake data for demo purposes
+	docker exec -it dccspinnaker_spinnaker_1 python tests/populate.py
 
 db:
 	# Run a local postgres database in a container
