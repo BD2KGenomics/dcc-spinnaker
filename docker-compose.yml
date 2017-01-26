@@ -29,6 +29,7 @@ services:
     volumes:
       - ./cert:/app/cert
       - ./accessControl.json:/app/accessControl.json
+    restart: always
 
   spinnaker:
     image: quay.io/ucsc_cgl/dcc-spinnaker
