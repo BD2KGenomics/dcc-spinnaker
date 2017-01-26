@@ -13,11 +13,26 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data
 
+  auth-proxy:
+    image: quay.io/ucsc_cgl/dcc-auth-proxy
+    environment:
+      GOOGLE_CLIENT_ID:
+      GOOGLE_CLIENT_SECRET:
+      PORT: 443
+      SERVICE_SPINNAKER_PORT: 5000
+      SESSION_SECRET:
+      COOKIE_DOMAIN:
+      HOST:
+      NODE_ENV: production #don't show stacktrace on client (amongst other things?)
+    ports:
+      - "443:443"
+    volumes:
+      - ./cert:/app/cert
+      - ./accessControl.json:/app/accessControl.json
+
   spinnaker:
     image: quay.io/ucsc_cgl/dcc-spinnaker
     environment:
       UCSC_STORAGE_TOKEN:
-    ports:
-      - "5000:5000"
     links:
       - db

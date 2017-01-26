@@ -9,21 +9,21 @@ class SubmissionsList extends React.Component {
   }
 
   componentDidMount() {
-		fetch("/v0/submissions")
+		fetch("/v0/submissions", { credentials: 'same-origin' })
     .then(response => response.json())
     .then(json => {
       this.setState(json);
-    });  
+    });
   }
 
 	handleSubmissionClick(submission) {
-    submission == this.state.expanded ? 
+    submission == this.state.expanded ?
       this.setState({expanded: null}) : this.setState({expanded: submission});
   }
 
   handleDownloadReceipt(submission) {
     if (submission.receipt) {
-      let receipt = "data:text/tab-separated-values," 
+      let receipt = "data:text/tab-separated-values,"
         + encodeURIComponent(submission.receipt);
       window.open(receipt);
     }
