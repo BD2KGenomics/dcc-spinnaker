@@ -51,3 +51,33 @@ which will create a new migration in /migrations which will get applied via make
 # API
 
 To view the swagger REST API documentation open a browser to <server>/api
+
+# Running Behind HTTPS Auth Proxy
+
+1. Obtain a domain name and point to your server.
+2. Obtain a certificate for that domain. LetsEncrypt is highly recommended. https://certbot.eff.org/#ubuntuxenial-other
+3. Place certificate in a `cert` directory in the root this project
+4. Create an accessControl.json file
+   should look something like this, anyone who has any privilege for a service will be forwarded on
+   w/ their email and a list of privileges as headers
+    ```
+    
+    {
+      "jane@example.com": ["spinnaker.user", "spinnaker.admin"]
+      "bob@example.com": ["spinnaker.user"]
+      "barbara@example.com": ["spinnaker.user"]
+    }
+    ```
+4. Pick a subdomain for your proxy server (e.g. proxy.example.com) and add it to your DNS
+5. Create an OAuth2 app using the Google developer console.
+   a) Add https://PROXYSUBDOMAIN/auth/google/callback s a callback url
+   b) ensure the Google Plus API is enabled (this is how user's profile information is obtained)
+6. Make sure you have defined the following environment variables defined
+    ```
+     GOOGLE_CLIENT_ID # obtain from Google Developer Console
+     GOOGLE_CLIENT_SECRET # obtain from Google Developer Console
+     SESSION_SECRET
+     COOKIE_DOMAIN # most likely your root domain e.g. example.com
+     HOST # your proxy subdomain (e.g. proxy.example.com)
+```
+7. Run with `docker-compose up`
