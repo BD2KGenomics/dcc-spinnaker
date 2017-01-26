@@ -70,10 +70,11 @@ To view the swagger REST API documentation open a browser to <server>/api
     ```
 4. Pick a subdomain for your proxy server (e.g. proxy.example.com) and add it to your DNS
 5. Create an OAuth2 app using the Google developer console.
-   a) Add https://PROXYSUBDOMAIN/auth/google/callback s a callback url
+   a) Add https://PROXYSUBDOMAIN/auth/google/callback as an Authorized redirect URI
    b) ensure the Google Plus API is enabled (this is how user's profile information is obtained)
-6. Make sure you have defined the following environment variables defined
+6. Make sure you have the following environment variables defined (outside your docker-compose file)
     ```
+     
      GOOGLE_CLIENT_ID # obtain from Google Developer Console
      GOOGLE_CLIENT_SECRET # obtain from Google Developer Console
      SESSION_SECRET
