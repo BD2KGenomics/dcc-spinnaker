@@ -5,11 +5,3 @@
 /__pycache__/
 /.cache/
 /tests/.cache/
-
-# access token for the Redwood server
-accessToken
-
-.env
-accessControl.json
-cert/ssl.crt
-cert/ssl.key

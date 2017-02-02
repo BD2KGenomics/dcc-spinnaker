@@ -12,7 +12,6 @@ import os
 from flask import url_for
 
 app = Flask(__name__, static_url_path="")
-app.wsgi_app = ProxyFix(app.wsgi_app)
 logging.basicConfig(level=logging.DEBUG)
 
 # monkey patch courtesy of
@@ -26,13 +25,13 @@ if os.environ.get('HTTPS'):
 
     Api.specs_url = specs_url
 
-
-
-# uwsgi is being used only to send async jobs to the spooler.
-# it's only available when the app is run in a uwsgi context.
-# Allow the app to be run outside of that context for other
-# tasks, eg db migration.
-# this MUST be after the logging.basicConfig or logging breaks.
+"""
+uwsgi is being used only to send async jobs to the spooler.
+it's only available when the app is run in a uwsgi context.
+Allow the app to be run outside of that context for other
+tasks, eg db migration.
+this MUST be after the logging.basicConfig or logging breaks.
+"""
 try:
     import uwsgi
 except ImportError:
@@ -47,7 +46,8 @@ def index():
 """
 Database and Models
 """
-app.config["SQLALCHEMY_DATABASE_URI"] = "postgres://spinnaker:gi123@db/spinnaker"
+app.config["SQLALCHEMY_DATABASE_URI"] = "postgres://{}:{}@db/spinnaker".format(
+    os.getenv("POSTGRES_USER"), os.getenv("POSTGRES_PASSWORD"))
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
