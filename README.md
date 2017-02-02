@@ -14,27 +14,24 @@ a token stored in the UCSC_STORAGE_TOKEN environment file.
 
     docker-compose up
 
+NOTE: Server listens on 5000 but the port is not exposed
+as we assume a proxy will be in front of the server in production
+and linked via docker.
 
 # Build, Debug and Test Locally
 
-Start the database container:
+Build out of the local folder
 
-    make db
+    make build
+
+Start the database and server running out of the current directory
+with auto reload:
+
+    make debug
 
 Create the database if it doens't exist and apply any migrations:
 
     make upgrade
-
-Build a local spinnaker docker container:
-
-    make build
-
-Run a debug server
-
-    make debug
-
-This runs the spinnaker container listening on port 5000 out of the local folder so
-you can make changes and it will live reload.
 
 To run tests open another terminal window and:
 
@@ -46,7 +43,9 @@ After making changes to the model:
 
     make migrate
 
-which will create a new migration in /migrations which will get applied via make upgrade
+which will create a new migration in /migrations which will get 
+applied via make upgrade which is automatically called in the 
+production server on startup.
 
 # API
 

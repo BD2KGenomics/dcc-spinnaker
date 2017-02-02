@@ -8,16 +8,30 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 from flask_restplus import Resource, Api, reqparse
+import os
+from flask import url_for
 
 app = Flask(__name__, static_url_path="")
 logging.basicConfig(level=logging.DEBUG)
 
+# monkey patch courtesy of
+# https://github.com/noirbizarre/flask-restplus/issues/54
+# so that /swagger.json is served over https
+if os.environ.get('HTTPS'):
+    @property
+    def specs_url(self):
+        """Monkey patch for HTTPS"""
+        return url_for(self.endpoint('specs'), _external=True, _scheme='https')
 
-# uwsgi is being used only to send async jobs to the spooler.
-# it's only available when the app is run in a uwsgi context.
-# Allow the app to be run outside of that context for other
-# tasks, eg db migration.
-# this MUST be after the logging.basicConfig or logging breaks.
+    Api.specs_url = specs_url
+
+"""
+uwsgi is being used only to send async jobs to the spooler.
+it's only available when the app is run in a uwsgi context.
+Allow the app to be run outside of that context for other
+tasks, eg db migration.
+this MUST be after the logging.basicConfig or logging breaks.
+"""
 try:
     import uwsgi
 except ImportError:
@@ -32,7 +46,8 @@ def index():
 """
 Database and Models
 """
-app.config["SQLALCHEMY_DATABASE_URI"] = "postgres://spinnaker:gi123@db/spinnaker"
+app.config["SQLALCHEMY_DATABASE_URI"] = "postgres://{}:{}@db/spinnaker".format(
+    os.getenv("POSTGRES_USER"), os.getenv("POSTGRES_PASSWORD"))
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
