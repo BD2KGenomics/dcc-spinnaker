@@ -14,12 +14,14 @@ def test_root(server):
 
 def test_submit(server):
     # create a submission
-    r = requests.post(url_for(server, "submissions"), json={})
+    r = requests.post(url_for(server, "submissions"), json={},
+                      headers={"dcc_email": "joe@acme.com"})
     assert(r.status_code == requests.codes.created)
 
     # make sure the submission was created correctly
     submission = json.loads(r.text)["submission"]
     assert(submission["status"] == "new")
+    assert(submission["user"] == "joe@acme.com")
 
     # verify it's there
     r = requests.get(url_for(server, "submissions/{}".format(submission["id"])))

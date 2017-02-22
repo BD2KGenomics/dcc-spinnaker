@@ -38,6 +38,11 @@ except ImportError:
     logging.info("Couldn't import uwsgi.")
 
 
+@app.route("/hello")
+def hello():
+    return "Hello"
+
+
 @app.route("/")
 def index():
     return app.send_static_file("index.html")
@@ -58,14 +63,15 @@ manager.add_command("db", MigrateCommand)
 
 class Submission(db.Model):
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    # status = db.Column(db.Enum("new", "received", "validated",
-    #                            "invalid", "signed"), default="new")
-    status = db.Column(db.Text, default="new")
+    status = db.Column(db.Enum("new", "received", "validated",
+                               "invalid", "signed"), default="new")
+    # status = db.Column(db.Text, default="new")
     created = db.Column(db.DateTime, default=datetime.datetime.utcnow())
     modified = db.Column(db.DateTime, default=datetime.datetime.utcnow())
     receipt = db.Column(db.Text)
     validation_message = db.Column(db.Text)
     validation_details = db.Column(db.Text)
+    user = db.Column(db.Text)
 
     def to_dict(self):
         """ Annoyingly jsonify doesn't automatically just work... """
@@ -99,6 +105,7 @@ class SubmissionsAPI(Resource):
         """ Create a new empty submission """
         fields = request.get_json()
         submission = Submission(**fields)
+        submission.user = request.headers.get("dcc_email", "")
         db.session.add(submission)
         db.session.commit()
         logging.info("Created submission id {}".format(submission.id))

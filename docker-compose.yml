@@ -19,6 +19,7 @@ services:
       POSTGRES_PASSWORD: gi123
       POSTGRES_USER: spinnaker
       POSTGRES_DB: spinnaker
+      UCSC_STORAGE_URL:
       UCSC_STORAGE_TOKEN:
     links:
       - db

@@ -87,9 +87,6 @@ receipt is a string containing the csv receipt document.
 # Checks that the metadata.json exists
 def validate_bbb_FileExists(receipt):
 
-    # Parameters - replicates ucsc-download.sh
-    BASE_URL = "https://storage2.ucsc-cgl.org:5431"
-
     def validate(receipt):
         receipt_arr = receipt.split('\n')
         reader = csv.DictReader(receipt_arr, delimiter='\t')
@@ -152,10 +149,10 @@ def validate_bbb_FileExists(receipt):
 
         if partial_download:
             result = redwood_client_lite.download_partial_file(
-                BASE_URL, uuid, os.getenv("UCSC_STORAGE_TOKEN"))
+                os.getenv("UCSC_STORAGE_URL"), uuid, os.getenv("UCSC_STORAGE_TOKEN"))
         else:
             result = redwood_client_lite.download_json(
-                BASE_URL, uuid, os.getenv("UCSC_STORAGE_TOKEN"))
+                os.getenv("UCSC_STORAGE_URL"), uuid, os.getenv("UCSC_STORAGE_TOKEN"))
         return result
 
     def check_downloaded_json(json):
