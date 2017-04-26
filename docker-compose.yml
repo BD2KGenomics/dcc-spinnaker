@@ -22,3 +22,6 @@ services:
       UCSC_STORAGE_TOKEN: "${UCSC_STORAGE_TOKEN}"
     links:
       - db
+    #this is for dev purposes only!
+    ports:
+      - '5000:5000'
