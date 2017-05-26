@@ -2,6 +2,8 @@ FROM alpine:3.5
 RUN apk add --update python py2-pip
 RUN pip install --upgrade pip
 
+RUN apk add --update curl
+
 WORKDIR /app
 RUN apk add --update uwsgi-python py-psycopg2 postgresql
 ADD ./requirements.txt /app/requirements.txt

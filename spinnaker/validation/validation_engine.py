@@ -88,8 +88,12 @@ receipt is a string containing the csv receipt document.
 def validate_bbb_FileExists(receipt):
 
     # Parameters - replicates ucsc-download.sh
-    BASE_URL = "https://storage2.ucsc-cgl.org:5431"
-
+    #BASE_URL = "https://storage2.ucsc-cgl.org:5431"
+    #BASE_URL = "storage.emily-dev.ucsc-cgl.org"
+    if not os.getenv("BASE_URL"):
+        logging.error("Must set BASE_URL")
+        return False
+    BASE_URL = "storage."+os.getenv("BASE_URL")
     def validate(receipt):
         receipt_arr = receipt.split('\n')
         reader = csv.DictReader(receipt_arr, delimiter='\t')
@@ -106,7 +110,6 @@ def validate_bbb_FileExists(receipt):
                 return bad_receipt_result
             if not(metadata and bundle and file_uuid):
                 return bad_receipt_result
-
             # Download the metadata and check it for emptyiness
             try:
                 downloaded_json = download_file(metadata, False)
@@ -121,7 +124,6 @@ def validate_bbb_FileExists(receipt):
             if not check_downloaded_json(downloaded_json):
                 return ValidationResult(False, ValidationResult.BAD_DOWNLOAD_METADATA,
                                         "Downloaded json %s is not valid." % metadata)
-
             # Also download and check the beginning of the data file
             try:
                 downloaded_file = download_file(file_uuid, True)
@@ -149,7 +151,7 @@ def validate_bbb_FileExists(receipt):
         if not os.getenv("UCSC_STORAGE_TOKEN"):
             logging.error("Must set UCSC_STORAGE_TOKEN")
             return False
-
+        print("BASE_URL "+BASE_URL+" uuid "+uuid+" UCSC_STORAGE_TOKEN "+os.getenv("UCSC_STORAGE_TOKEN"))
         if partial_download:
             result = redwood_client_lite.download_partial_file(
                 BASE_URL, uuid, os.getenv("UCSC_STORAGE_TOKEN"))
