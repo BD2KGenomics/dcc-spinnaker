@@ -40,6 +40,7 @@ except ImportError:
 
 @app.route("/")
 def index():
+    logging.info("emily")
     return app.send_static_file("index.html")
 
 
