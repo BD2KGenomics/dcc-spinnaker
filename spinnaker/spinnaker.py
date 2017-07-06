@@ -10,6 +10,7 @@ from flask_migrate import Migrate, MigrateCommand
 from flask_restplus import Resource, Api, reqparse
 import os
 from flask import url_for
+from flask import render_template
 
 app = Flask(__name__, static_url_path="")
 logging.basicConfig(level=logging.DEBUG)
@@ -41,8 +42,8 @@ except ImportError:
 @app.route("/")
 def index():
     logging.info("emily")
-    return app.send_static_file("index.html")
-
+    #return app.send_static_file("index.html")
+    return render_template("index.html")
 
 """
 Database and Models

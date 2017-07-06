@@ -90,11 +90,11 @@ def validate_bbb_FileExists(receipt):
     # Parameters - replicates ucsc-download.sh
     #BASE_URL = "https://storage2.ucsc-cgl.org:5431"
     #BASE_URL = "storage.emily-dev.ucsc-cgl.org"
-    #if not os.getenv("BASE_URL"):
-    #    logging.error("Must set BASE_URL")
-    #    return False
-    #BASE_URL = "storage."+os.getenv("BASE_URL")
-    BASE_URL = storage.emily.ucsc-cgp-dev.org
+    if not os.getenv("BASE_URL"):
+        logging.error("Must set BASE_URL")
+        return False
+    BASE_URL = "storage."+os.getenv("BASE_URL")
+    #BASE_URL = "storage.emily.ucsc-cgp-dev.org"
     def validate(receipt):
         receipt_arr = receipt.split('\n')
         reader = csv.DictReader(receipt_arr, delimiter='\t')
